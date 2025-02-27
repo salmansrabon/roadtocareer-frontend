@@ -1,0 +1,75 @@
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { useRouter } from "next/router";
+
+export default function Login() {
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState(""); // ✅ Store error messages
+    const router = useRouter();
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (token) {
+            router.push("/dashboard"); // Redirect if already logged in
+        }
+    }, []);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError(""); // ✅ Clear previous errors
+        try {
+            const res = await axios.post("http://localhost:5000/api/auth/login", { email, password });
+
+            if (res.data.token && res.data.user) {
+                localStorage.setItem("token", res.data.token);
+                localStorage.setItem("user", JSON.stringify(res.data.user)); // ✅ Store user data
+                router.push("/dashboard");
+            } else {
+                setError("Invalid response from server.");
+            }
+        } catch (error) {
+            // ✅ Handle different errors
+            if (error.response) {
+                setError(error.response.data.message); // ✅ Show error message from backend
+            } else {
+                setError("An unexpected error occurred.");
+            }
+        }
+    };
+
+    return (
+        <div className="d-flex align-items-center justify-content-center vh-100 bg-light">
+            <div className="card p-4 shadow-lg" style={{ width: "400px" }}>
+                <h3 className="text-center mb-3">Login</h3>
+
+                {/* ✅ Show Error Message */}
+                {error && <div className="alert alert-danger">{error}</div>}
+
+                <form onSubmit={handleSubmit}>
+                    <div className="mb-3">
+                        <label className="form-label">Email</label>
+                        <input 
+                            type="email" 
+                            className="form-control" 
+                            placeholder="Enter email" 
+                            onChange={(e) => setEmail(e.target.value)} 
+                            required 
+                        />
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Password</label>
+                        <input 
+                            type="password" 
+                            className="form-control" 
+                            placeholder="Enter password" 
+                            onChange={(e) => setPassword(e.target.value)} 
+                            required 
+                        />
+                    </div>
+                    <button type="submit" className="btn btn-primary w-100">Login</button>
+                </form>
+            </div>
+        </div>
+    );
+}
