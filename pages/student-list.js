@@ -38,7 +38,7 @@ export default function StudentList() {
             student.mobile.includes(value) ||
             student.profession?.toLowerCase().includes(value) ||
             student.university.toLowerCase().includes(value) ||
-            String(student.User.isValid).includes(value)
+            String(student.User?.isValid).includes(value)
         );
         setFilteredStudents(filtered);
     };

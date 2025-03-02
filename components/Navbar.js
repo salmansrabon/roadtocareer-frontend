@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/router";
-import { FaBars } from "react-icons/fa";
+import { FaUserCircle } from "react-icons/fa"; // ✅ Import Profile Icon
 
-const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
+const Navbar = () => {
     const [showDropdown, setShowDropdown] = useState(false);
     const router = useRouter();
     const dropdownRef = useRef(null);
@@ -18,7 +18,7 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-                setShowDropdown(false);
+                setShowDropdown(false); // ✅ Close dropdown if clicked outside
             }
         };
 
@@ -29,28 +29,61 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
     }, []);
 
     return (
-        <nav className="navbar navbar-dark bg-dark px-4 d-flex justify-content-between"
+        <nav className="navbar navbar-dark bg-dark px-4 d-flex justify-content-between align-items-center"
             style={{ 
                 position: "fixed", 
                 top: 0, 
-                left: isSidebarOpen ? "250px" : "0", 
+                left: "250px", 
                 right: 0, 
-                height: "70px",
+                height: "70px",  
                 zIndex: 1000,
-                transition: "left 0.3s ease-in-out",
+                boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)"
             }}
         >
-            {/* ✅ Drawer Toggle Button for Mobile */}
-            <button className="btn btn-warning d-md-none" onClick={toggleSidebar}>
-                <FaBars size={20} />
-            </button>
-
-            <h2 className="text-white" style={{ cursor: "pointer" }} onClick={() => router.push("/dashboard")}>
+            {/* ✅ Clickable Admin Dashboard */}
+            <h2 
+                className="text-white" 
+                style={{ cursor: "pointer" }} 
+                onClick={() => router.push("/dashboard")}
+            >
                 Admin Dashboard
             </h2>
 
-            <div className="text-white" onClick={() => setShowDropdown(!showDropdown)} style={{ cursor: "pointer" }}>
-                Profile ▼
+            {/* ✅ Profile Dropdown */}
+            <div className="position-relative" ref={dropdownRef}>
+                <div 
+                    className="d-flex align-items-center text-warning fw-bold" // ✅ Text & Icon Yellow
+                    onClick={() => setShowDropdown((prev) => !prev)} // ✅ Fix toggle
+                    style={{ cursor: "pointer", fontSize: "16px", userSelect: "none" }}
+                >
+                    <FaUserCircle size={20} className="me-1" /> {/* ✅ Profile Icon */}
+                    Profile ▼
+                </div>
+
+                {/* ✅ Show dropdown only when clicked */}
+                {showDropdown && (
+                    <div 
+                        className="position-absolute bg-white shadow-lg rounded p-2" 
+                        style={{ right: 0, top: "40px", minWidth: "160px", zIndex: 2000 }} // ✅ Ensure z-index is high
+                    >
+                        <ul className="list-unstyled mb-0">
+                            <li 
+                                className="p-2 text-dark" 
+                                onClick={() => { setShowDropdown(false); router.push("/profile"); }} 
+                                style={{ cursor: "pointer" }}
+                            >
+                                My Profile
+                            </li>
+                            <li 
+                                className="p-2 text-danger" 
+                                onClick={handleLogout} 
+                                style={{ cursor: "pointer" }}
+                            >
+                                Logout
+                            </li>
+                        </ul>
+                    </div>
+                )}
             </div>
         </nav>
     );
