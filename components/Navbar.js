@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/router";
+import { FaBars } from "react-icons/fa";
 
-const Navbar = () => {
+const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
     const [showDropdown, setShowDropdown] = useState(false);
     const router = useRouter();
     const dropdownRef = useRef(null);
@@ -17,7 +18,7 @@ const Navbar = () => {
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-                setShowDropdown(false); // ✅ Close dropdown if clicked outside
+                setShowDropdown(false);
             }
         };
 
@@ -32,55 +33,24 @@ const Navbar = () => {
             style={{ 
                 position: "fixed", 
                 top: 0, 
-                left: "250px", 
+                left: isSidebarOpen ? "250px" : "0", 
                 right: 0, 
-                height: "70px",  // ✅ Fixed height for proper spacing
+                height: "70px",
                 zIndex: 1000,
-                boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-                display: "flex",
-                alignItems: "center"
+                transition: "left 0.3s ease-in-out",
             }}
         >
-            {/* ✅ Clickable Admin Dashboard */}
-            <h2 
-                className="text-white" 
-                style={{ cursor: "pointer" }} 
-                onClick={() => router.push("/dashboard")}
-            >
+            {/* ✅ Drawer Toggle Button for Mobile */}
+            <button className="btn btn-warning d-md-none" onClick={toggleSidebar}>
+                <FaBars size={20} />
+            </button>
+
+            <h2 className="text-white" style={{ cursor: "pointer" }} onClick={() => router.push("/dashboard")}>
                 Admin Dashboard
             </h2>
 
-            {/* ✅ Profile Dropdown */}
-            <div className="position-relative" ref={dropdownRef}>
-                <div 
-                    className="text-white"
-                    onClick={() => setShowDropdown(!showDropdown)}
-                    style={{ cursor: "pointer" }}
-                >
-                    Profile ▼
-                </div>
-
-                {showDropdown && (
-                    <div className="position-absolute bg-white shadow-lg rounded p-2" 
-                        style={{ right: 0, top: "40px", minWidth: "150px" }}>
-                        <ul className="list-unstyled mb-0">
-                            <li 
-                                className="p-2 text-dark" 
-                                onClick={() => { setShowDropdown(false); router.push("/profile"); }} 
-                                style={{ cursor: "pointer" }}
-                            >
-                                My Profile
-                            </li>
-                            <li 
-                                className="p-2 text-danger" 
-                                onClick={handleLogout} 
-                                style={{ cursor: "pointer" }}
-                            >
-                                Logout
-                            </li>
-                        </ul>
-                    </div>
-                )}
+            <div className="text-white" onClick={() => setShowDropdown(!showDropdown)} style={{ cursor: "pointer" }}>
+                Profile ▼
             </div>
         </nav>
     );

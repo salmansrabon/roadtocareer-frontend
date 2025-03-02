@@ -3,7 +3,7 @@ import axios from "axios";
 import { useRouter } from "next/router";
 
 export default function Login() {
-    const [email, setEmail] = useState("");
+    const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState(""); // ✅ Store error messages
     const router = useRouter();
@@ -19,7 +19,7 @@ export default function Login() {
         e.preventDefault();
         setError(""); // ✅ Clear previous errors
         try {
-            const res = await axios.post("http://localhost:5000/api/auth/login", { email, password });
+            const res = await axios.post("http://localhost:5000/api/auth/login", { username, password });
 
             if (res.data.token && res.data.user) {
                 localStorage.setItem("token", res.data.token);
@@ -48,12 +48,12 @@ export default function Login() {
 
                 <form onSubmit={handleSubmit}>
                     <div className="mb-3">
-                        <label className="form-label">Email</label>
+                        <label className="form-label">Username</label>
                         <input 
-                            type="email" 
+                            type="text" 
                             className="form-control" 
-                            placeholder="Enter email" 
-                            onChange={(e) => setEmail(e.target.value)} 
+                            placeholder="Enter username" 
+                            onChange={(e) => setUsername(e.target.value)} 
                             required 
                         />
                     </div>

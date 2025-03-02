@@ -1,12 +1,14 @@
-import "bootstrap/dist/css/bootstrap.min.css"; // ✅ Import Bootstrap globally
+import "bootstrap/dist/css/bootstrap.min.css";
 import Layout from "../components/Layout";
 import { useRouter } from "next/router";
 
 function MyApp({ Component, pageProps }) {
     const router = useRouter();
-    const noLayoutPages = ["/login"]; // ✅ List of pages that should NOT have Layout
+    const noLayoutPages = ["/login", /^\/enroll\/.*/]; // ✅ Exclude Enrollment Page
 
-    return noLayoutPages.includes(router.pathname) ? (
+    return noLayoutPages.some(pattern => 
+        typeof pattern === "string" ? router.pathname === pattern : pattern.test(router.pathname)
+    ) ? (
         <Component {...pageProps} />
     ) : (
         <Layout>
