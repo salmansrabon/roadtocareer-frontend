@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
-import { FaEye } from "react-icons/fa";
+import { FaCcPaypal, FaEye } from "react-icons/fa";
 
 export default function StudentList() {
     const [students, setStudents] = useState([]);
@@ -102,14 +102,21 @@ export default function StudentList() {
                                                         {isValid === 1 ? "Active" : "Disabled"}
                                                     </span>
                                                 </td>
-                                                <td>
+                                                <td className="d-flex align-items-center">
                                                     <button 
-                                                        className="btn btn-info btn-sm mx-1"
+                                                        className="btn btn-info btn-sm me-3"
                                                         onClick={() => router.push(`/students/details/${student.StudentId}`)}
                                                     >
                                                         <FaEye />
                                                     </button>
+                                                    <button 
+                                                        className="btn btn-info btn-sm"
+                                                        onClick={() => router.push(`/students/payments/history/${student.StudentId}`)}
+                                                    >
+                                                        <FaCcPaypal />
+                                                    </button>
                                                 </td>
+                                            
                                             </tr>
                                         );
                                     })

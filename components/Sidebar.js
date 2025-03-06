@@ -10,7 +10,7 @@ const Sidebar = ({ role, isOpen, toggleSidebar }) => {
         ? [
             { name: "Courses", path: "/courses" },
             { name: "Create Package", path: "/create-package" },
-            { name: "Create Modules", path: "/create-modules" },
+            { name: "Create Modules", path: "/modules" },
             { name: "Student List", path: "/student-list" },
             { name: "Attendance", path: "/attendance" },
             { name: "Certificate", path: "/certificate" }
