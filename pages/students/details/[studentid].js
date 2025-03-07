@@ -32,55 +32,55 @@ export default function StudentDetails() {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-    
+
         setFormData((prev) => ({
             ...prev,
             [name]: name === "isEnrolled" ? Number(value) : value, // ✅ Convert `isEnrolled` to Number (1 or 0)
-            User: name === "isValid" 
+            User: name === "isValid"
                 ? { ...prev.User, isValid: Number(value) } // ✅ Update `isValid` inside `User`
                 : prev.User, // ✅ Keep User unchanged for other fields
         }));
     };
-    
+
 
     // ✅ Handle Update Student
     const handleUpdate = async () => {
         setUpdating(true);
-    
+
         try {
             // ✅ Prepare updated data (Ensure `isEnrolled` is converted to Number)
             const updatedData = {
                 ...formData,
                 isEnrolled: formData.isEnrolled ? 1 : 0, // Ensure correct format
             };
-    
+
             // 🔹 Update Student Info (including `isEnrolled`)
             await axios.put(`http://localhost:5000/api/students/${studentid}`, updatedData);
-    
+
             // 🔹 Update User Status if `isValid` has changed
             if (formData.User?.isValid !== originalData.User?.isValid) {
                 await axios.patch(`http://localhost:5000/api/users/${studentid}`, {
                     isValid: formData.User?.isValid
                 });
             }
-    
+
             // ✅ Update UI: Ensure both `isValid` and `isEnrolled` are reflected
             setStudent((prev) => ({
                 ...prev,
                 isEnrolled: !!updatedData.isEnrolled, // Convert to Boolean for UI
                 User: { ...prev.User, isValid: formData.User?.isValid }
             }));
-    
+
             setOriginalData(updatedData);
             setIsEditing(false);
             fetchStudentData(); // ✅ Refresh student data
         } catch (err) {
             setError("Failed to update student details.");
         }
-    
+
         setUpdating(false);
     };
-    
+
 
     // ✅ Handle Cancel (Reset Fields)
     const handleCancel = () => {
@@ -264,7 +264,20 @@ export default function StudentDetails() {
                         </td>
                     </tr>
 
-                    <tr><td><strong>Registered On</strong></td><td>{new Date(student.createdAt).toLocaleString()}</td></tr>
+                    <tr>
+                        <td><strong>Registered On</strong></td>
+                        <td>
+                            {new Date(student.createdAt).toLocaleString("en-US", {
+                                month: "long",
+                                day: "2-digit",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                second: "2-digit",
+                                hour12: true
+                            }).replace(",", "").replace(/(\d{2}) (\d{4})/, "$1/$2")}
+                        </td>
+                    </tr>
                 </tbody>
             </table>
 
