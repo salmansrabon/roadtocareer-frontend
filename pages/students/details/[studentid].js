@@ -30,56 +30,57 @@ export default function StudentDetails() {
             });
     }, [router.isReady, studentid]); // ✅ Add router.isReady dependency
 
-    // ✅ Handle Input Change
     const handleChange = (e) => {
         const { name, value } = e.target;
-
-        // Handle `isValid` separately since it belongs to `User`
-        if (name === "isValid") {
-            setFormData((prev) => ({
-                ...prev,
-                User: {
-                    ...prev.User, // Keep existing user properties
-                    isValid: Number(value), // Convert to number
-                }
-            }));
-        } else {
-            setFormData((prev) => ({
-                ...prev,
-                [name]: value,
-            }));
-        }
+    
+        setFormData((prev) => ({
+            ...prev,
+            [name]: name === "isEnrolled" ? Number(value) : value, // ✅ Convert `isEnrolled` to Number (1 or 0)
+            User: name === "isValid" 
+                ? { ...prev.User, isValid: Number(value) } // ✅ Update `isValid` inside `User`
+                : prev.User, // ✅ Keep User unchanged for other fields
+        }));
     };
+    
 
     // ✅ Handle Update Student
     const handleUpdate = async () => {
         setUpdating(true);
-
+    
         try {
-            // 🔹 Update Student Info
-            await axios.put(`http://localhost:5000/api/students/${studentid}`, formData);
-
-            // 🔹 Update User Status if changed
+            // ✅ Prepare updated data (Ensure `isEnrolled` is converted to Number)
+            const updatedData = {
+                ...formData,
+                isEnrolled: formData.isEnrolled ? 1 : 0, // Ensure correct format
+            };
+    
+            // 🔹 Update Student Info (including `isEnrolled`)
+            await axios.put(`http://localhost:5000/api/students/${studentid}`, updatedData);
+    
+            // 🔹 Update User Status if `isValid` has changed
             if (formData.User?.isValid !== originalData.User?.isValid) {
                 await axios.patch(`http://localhost:5000/api/users/${studentid}`, {
                     isValid: formData.User?.isValid
                 });
             }
-
-            // ✅ Update UI
+    
+            // ✅ Update UI: Ensure both `isValid` and `isEnrolled` are reflected
             setStudent((prev) => ({
                 ...prev,
+                isEnrolled: !!updatedData.isEnrolled, // Convert to Boolean for UI
                 User: { ...prev.User, isValid: formData.User?.isValid }
             }));
-            setOriginalData(formData);
+    
+            setOriginalData(updatedData);
             setIsEditing(false);
-            fetchStudentData();
+            fetchStudentData(); // ✅ Refresh student data
         } catch (err) {
             setError("Failed to update student details.");
         }
-
+    
         setUpdating(false);
     };
+    
 
     // ✅ Handle Cancel (Reset Fields)
     const handleCancel = () => {
@@ -109,7 +110,7 @@ export default function StudentDetails() {
             setError("Failed to fetch student details.");
         }
     };
-    
+
 
     if (loading) return <div className="text-center mt-5"><strong>Loading...</strong></div>;
     if (error) return <div className="alert alert-danger">{error}</div>;
@@ -233,6 +234,36 @@ export default function StudentDetails() {
                             ) : student.remark}
                         </td>
                     </tr>
+                    <tr>
+                        <td><strong>isEnrolled</strong></td>
+                        <td>
+                            {isEditing ? (
+                                <select
+                                    className="form-control"
+                                    name="isEnrolled"
+                                    value={formData.isEnrolled ? 1 : 0} // ✅ Ensure it's converted to 1/0
+                                    onChange={handleChange}
+                                >
+                                    <option value={1}>True</option>
+                                    <option value={0}>False</option>
+                                </select>
+                            ) : (
+                                <span
+                                    className="badge"
+                                    style={{
+                                        backgroundColor: student.isEnrolled ? "#28a745" : "#dc3545",
+                                        color: "#fff",
+                                        padding: "6px 12px",
+                                        borderRadius: "8px",
+                                        fontWeight: "bold"
+                                    }}
+                                >
+                                    {student.isEnrolled ? "True" : "False"} {/* ✅ Properly Display True/False */}
+                                </span>
+                            )}
+                        </td>
+                    </tr>
+
                     <tr><td><strong>Registered On</strong></td><td>{new Date(student.createdAt).toLocaleString()}</td></tr>
                 </tbody>
             </table>
