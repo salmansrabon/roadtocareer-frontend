@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import axios from "axios";
+import Link from "next/link";
 
 export default function CourseDetails() {
     const router = useRouter();
@@ -64,7 +65,10 @@ export default function CourseDetails() {
                                     <strong>Batch:</strong> {course.batch_no} <br />
                                     <strong>Package:</strong> {course.Packages[0]?.packageName || "N/A"} <br />
                                     <strong>Course Fee:</strong> <span className="text-success">{course.Packages[0]?.jobholderFee || "N/A"} TK</span> <br />
-                                    <strong>After discount:</strong> <span className="text-primary">{course.Packages[0]?.studentFee || "N/A"} TK</span>
+                                    <strong>After discount:</strong> <span className="text-primary">{course.Packages[0]?.studentFee || "N/A"} TK</span><br/>
+                                    <Link href={`/enroll/${course.courseId}`}>
+                                        <button className="btn btn-success">Enroll Now</button>
+                                    </Link>
                                 </p>
                             </div>
                         </div>

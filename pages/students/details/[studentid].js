@@ -9,71 +9,72 @@ export default function StudentDetails() {
     const [student, setStudent] = useState(null);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(true);
-    const [isEditing, setIsEditing] = useState(false); // ✅ Track Edit Mode
-    const [formData, setFormData] = useState({}); // ✅ Track Editable Data
+    const [isEditing, setIsEditing] = useState(false);
+    const [formData, setFormData] = useState({});
     const [originalData, setOriginalData] = useState({});
     const [updating, setUpdating] = useState(false);
+    const [updateMessage, setUpdateMessage] = useState(""); // ✅ New State for API Response Message
 
     useEffect(() => {
-        if (!router.isReady || !studentid) return; // ✅ Ensure router is ready
+        if (!router.isReady || !studentid) return;
 
         axios.get(`http://localhost:5000/api/students/${studentid}`)
             .then(res => {
                 setStudent(res.data);
-                setFormData(res.data); // ✅ Initialize formData
-                setOriginalData(res.data); // ✅ Store Original Data for Reset
+                setFormData(res.data);
+                setOriginalData(res.data);
                 setLoading(false);
             })
             .catch(err => {
                 setError("Failed to fetch student details.");
                 setLoading(false);
             });
-    }, [router.isReady, studentid]); // ✅ Add router.isReady dependency
+    }, [router.isReady, studentid]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
 
         setFormData((prev) => ({
             ...prev,
-            [name]: name === "isEnrolled" ? Number(value) : value, // ✅ Convert `isEnrolled` to Number (1 or 0)
+            [name]: name === "isEnrolled" ? Number(value) : value,
             User: name === "isValid"
-                ? { ...prev.User, isValid: Number(value) } // ✅ Update `isValid` inside `User`
-                : prev.User, // ✅ Keep User unchanged for other fields
+                ? { ...prev.User, isValid: Number(value) }
+                : prev.User,
         }));
     };
-
 
     // ✅ Handle Update Student
     const handleUpdate = async () => {
         setUpdating(true);
+        setUpdateMessage(""); // ✅ Clear previous messages
 
         try {
-            // ✅ Prepare updated data (Ensure `isEnrolled` is converted to Number)
             const updatedData = {
                 ...formData,
-                isEnrolled: formData.isEnrolled ? 1 : 0, // Ensure correct format
+                isEnrolled: formData.isEnrolled ? 1 : 0,
             };
 
-            // 🔹 Update Student Info (including `isEnrolled`)
             await axios.put(`http://localhost:5000/api/students/${studentid}`, updatedData);
 
-            // 🔹 Update User Status if `isValid` has changed
             if (formData.User?.isValid !== originalData.User?.isValid) {
-                await axios.patch(`http://localhost:5000/api/users/${studentid}`, {
+                const userResponse = await axios.patch(`http://localhost:5000/api/users/${studentid}`, {
                     isValid: formData.User?.isValid
                 });
+
+                if (userResponse.data.message) {
+                    setUpdateMessage(userResponse.data.message); // ✅ Store API Response Message
+                }
             }
 
-            // ✅ Update UI: Ensure both `isValid` and `isEnrolled` are reflected
             setStudent((prev) => ({
                 ...prev,
-                isEnrolled: !!updatedData.isEnrolled, // Convert to Boolean for UI
+                isEnrolled: !!updatedData.isEnrolled,
                 User: { ...prev.User, isValid: formData.User?.isValid }
             }));
 
             setOriginalData(updatedData);
             setIsEditing(false);
-            fetchStudentData(); // ✅ Refresh student data
+            fetchStudentData();
         } catch (err) {
             setError("Failed to update student details.");
         }
@@ -81,14 +82,12 @@ export default function StudentDetails() {
         setUpdating(false);
     };
 
-
-    // ✅ Handle Cancel (Reset Fields)
     const handleCancel = () => {
-        setFormData(originalData); // ✅ Reset form data to original
+        setFormData(originalData);
         setIsEditing(false);
+        setUpdateMessage(""); // ✅ Clear message on cancel
     };
 
-    // ✅ Handle Delete Student
     const handleDelete = async () => {
         if (!confirm("Are you sure you want to delete this student?")) return;
 
@@ -100,6 +99,7 @@ export default function StudentDetails() {
             setError("Failed to delete student.");
         }
     };
+
     const fetchStudentData = async () => {
         try {
             const res = await axios.get(`http://localhost:5000/api/students/${studentid}`);
@@ -111,7 +111,6 @@ export default function StudentDetails() {
         }
     };
 
-
     if (loading) return <div className="text-center mt-5"><strong>Loading...</strong></div>;
     if (error) return <div className="alert alert-danger">{error}</div>;
 
@@ -119,14 +118,12 @@ export default function StudentDetails() {
         <div className="container mt-5">
             <h2 className="fw-bold text-primary text-center mb-4">Student Details</h2>
 
-            {/* ✅ Display Course and Batch Info */}
             <div className="text-center mb-3">
                 <h4 className="fw-bold text-dark">{student.Course?.course_title || "N/A"}</h4>
                 <p className="text-muted fs-5">Course Id: {student.Course?.courseId}</p>
                 <p className="text-muted fs-5">Batch: <strong>{student.batch_no}</strong></p>
             </div>
 
-            {/* ✅ Student Details Table */}
             <table className="table table-bordered table-hover shadow-sm">
                 <tbody>
                     <tr>
@@ -158,7 +155,6 @@ export default function StudentDetails() {
                             )}
                         </td>
                     </tr>
-
                     <tr><td><strong>Student ID</strong></td><td>{student.StudentId}</td></tr>
                     <tr><td><strong>Name</strong></td>
                         <td>
@@ -241,7 +237,7 @@ export default function StudentDetails() {
                                 <select
                                     className="form-control"
                                     name="isEnrolled"
-                                    value={formData.isEnrolled ? 1 : 0} // ✅ Ensure it's converted to 1/0
+                                    value={formData.isEnrolled ? 1 : 0}
                                     onChange={handleChange}
                                 >
                                     <option value={1}>True</option>
@@ -258,7 +254,7 @@ export default function StudentDetails() {
                                         fontWeight: "bold"
                                     }}
                                 >
-                                    {student.isEnrolled ? "True" : "False"} {/* ✅ Properly Display True/False */}
+                                    {student.isEnrolled ? "True" : "False"}
                                 </span>
                             )}
                         </td>
@@ -281,7 +277,6 @@ export default function StudentDetails() {
                 </tbody>
             </table>
 
-            {/* ✅ Buttons */}
             <div className="text-center mt-3">
                 {isEditing ? (
                     <>
@@ -308,6 +303,12 @@ export default function StudentDetails() {
                 </button>
             </div>
 
+            {/* ✅ Display Response Message */}
+            {updateMessage && (
+                <div className="d-flex justify-content-center mt-3">
+                    <div className="alert alert-info text-center w-50">{updateMessage}</div>
+                </div>
+            )}
         </div>
     );
 }

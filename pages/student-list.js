@@ -73,7 +73,9 @@ export default function StudentList() {
                                     <th>Mobile</th>
                                     <th>Profession</th>
                                     <th>University</th>
-                                    <th>Status</th>
+                                    <th>Due</th>
+                                    <th>isValid</th>     
+                                    <th>isEnrolled</th>        
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -97,9 +99,15 @@ export default function StudentList() {
                                                 <td>{student.mobile}</td>
                                                 <td>{student.profession || "N/A"}</td>
                                                 <td>{student.university}</td>
+                                                <td>{student.due}</td>
                                                 <td>
                                                     <span className={`badge ${isValid === 1 ? "bg-success" : "bg-danger"}`}>
                                                         {isValid === 1 ? "Active" : "Disabled"}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <span className={`badge ${student.isEnrolled === true ? "bg-success" : "bg-danger"}`}>
+                                                        {student.isEnrolled === true ? "True" : "False"}
                                                     </span>
                                                 </td>
                                                 <td className="d-flex align-items-center">

@@ -168,7 +168,7 @@ export default function PaymentHistory() {
                                 <tr>
                                     <th>Installment No.</th>
                                     <th>Paid Amount</th>
-                                    <th>Remaining Balance</th>
+                                    <th>Remaining Due</th>
                                     <th>Month</th>
                                     <th>Payment Date</th>
                                 </tr>
