@@ -8,7 +8,7 @@ function MyApp({ Component, pageProps }) {
     const router = useRouter();
 
     // ✅ Pages that should use the FrontPage Layout (Public Pages)
-    const frontPageRoutes = ["/", "/login", /^\/enroll\/.*/,/^\/courses\/.*/]; // ✅ Now includes Enroll & Login
+    const frontPageRoutes = ["/", "/login", /^\/enroll\/.*/,/^\/courses\/.*/,"/reviews"]; // ✅ Now includes Enroll & Login
 
     if (frontPageRoutes.some(pattern => 
         typeof pattern === "string" ? router.pathname === pattern : pattern.test(router.pathname)

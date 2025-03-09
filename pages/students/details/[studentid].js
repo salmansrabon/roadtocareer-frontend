@@ -156,6 +156,13 @@ export default function StudentDetails() {
                         </td>
                     </tr>
                     <tr><td><strong>Student ID</strong></td><td>{student.StudentId}</td></tr>
+                    <tr><td><strong>Salutation</strong></td>
+                        <td>
+                            {isEditing ? (
+                                <input type="text" className="form-control" name="salutation" value={formData.salutation} onChange={handleChange} />
+                            ) : student.salutation}
+                        </td>
+                    </tr>
                     <tr><td><strong>Name</strong></td>
                         <td>
                             {isEditing ? (

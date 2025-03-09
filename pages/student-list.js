@@ -5,64 +5,168 @@ import { FaCcPaypal, FaEye } from "react-icons/fa";
 
 export default function StudentList() {
     const [students, setStudents] = useState([]);
-    const [filteredStudents, setFilteredStudents] = useState([]);
-    const [search, setSearch] = useState("");
     const [totalStudents, setTotalStudents] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [courses, setCourses] = useState([]); // ✅ Store courses list
+    const [filters, setFilters] = useState({
+        courseId: "",
+        batch_no: "",
+        studentId: "",
+        student_name: "",
+        email: "",
+        mobile: "",
+        university: "",
+        profession: "",
+        company: "",
+        isValid: "",
+        isEnrolled: "",
+    });
 
     const router = useRouter();
 
     useEffect(() => {
-        axios.get("http://localhost:5000/api/students/list")
-            .then((res) => {
-                setStudents(res.data.students);
-                setFilteredStudents(res.data.students);
-                setTotalStudents(res.data.totalStudents);
-                setLoading(false);
-            })
-            .catch((err) => {
-                console.error("Error fetching students:", err);
-                setError("Failed to fetch student list.");
-                setLoading(false);
-            });
+        fetchStudents();
+        fetchCourses();
     }, []);
 
-    const handleSearch = (e) => {
-        const value = e.target.value.toLowerCase();
-        setSearch(value);
+    // ✅ Fetch Students from API with Filters
+    const fetchStudents = async () => {
+        setLoading(true);
+        setError("");
 
-        const filtered = students.filter(student =>
-            student.student_name.toLowerCase().includes(value) ||
-            student.email.toLowerCase().includes(value) ||
-            student.mobile.includes(value) ||
-            student.profession?.toLowerCase().includes(value) ||
-            student.university.toLowerCase().includes(value) ||
-            String(student.User?.isValid).includes(value)
-        );
-        setFilteredStudents(filtered);
+        try {
+            const queryParams = new URLSearchParams(filters).toString();
+            const response = await axios.get(`http://localhost:5000/api/students/list?${queryParams}`);
+
+            setStudents(response.data.students || []); // ✅ Ensure data is an array
+            setTotalStudents(response.data.totalStudents || 0);
+        } catch (err) {
+            console.error("Error fetching students:", err);
+            setError("Failed to fetch student list.");
+        }
+
+        setLoading(false);
+    };
+
+    // ✅ Fetch Course List
+    const fetchCourses = async () => {
+        try {
+            const response = await axios.get("http://localhost:5000/api/courses/list");
+            const sortedCourses = response.data.courses.sort((a, b) => b.courseId.localeCompare(a.courseId));
+            setCourses(sortedCourses);
+        } catch (err) {
+            console.error("Error fetching courses:", err);
+        }
+    };
+
+    // ✅ Handle Filter Changes
+    const handleFilterChange = (e) => {
+        const { name, value } = e.target;
+        setFilters((prev) => ({ ...prev, [name]: value }));
     };
 
     return (
-        <div className="container-fluid mt-4"> {/* ✅ Full Width Container */}
+        <div className="container-fluid mt-4">
             <div className="card shadow-lg p-4">
                 <h2 className="text-primary fw-bold text-center">Student List ({totalStudents})</h2>
 
-                <input
-                    type="text"
-                    className="form-control my-3"
-                    placeholder="Search by name, email, mobile, profession, university, isValid..."
-                    value={search}
-                    onChange={handleSearch}
-                />
+                {/* ✅ Filters Section */}
+                <div className="row mb-3">
+                    {/* Course Dropdown */}
+                    <div className="col-md-3">
+                        <select className="form-control" name="courseId" value={filters.courseId} onChange={handleFilterChange}>
+                            <option value="">All Courses</option>
+                            {courses.map((course) => (
+                                <option key={course.courseId} value={course.courseId}>
+                                    {course.courseId} - {course.course_title}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
 
+                    {/* Batch No */}
+                    <div className="col-md-3">
+                        <input type="text" className="form-control" placeholder="Batch No" name="batch_no" value={filters.batch_no} onChange={handleFilterChange} />
+                    </div>
+
+                    {/* Student ID */}
+                    <div className="col-md-3">
+                        <input type="text" className="form-control" placeholder="Student ID" name="studentId" value={filters.studentId} onChange={handleFilterChange} />
+                    </div>
+                    {/* Salutation */}
+                    <div className="col-md-3">
+                        <select
+                            className="form-control"
+                            name="salutation"
+                            value={filters.salutation}
+                            onChange={handleFilterChange}
+                        >
+                            <option value="">Select Salutation</option>
+                            <option value="Mr">Mr</option>
+                            <option value="Mrs">Mrs</option>
+                        </select>
+                    </div>
+                    {/* Student Name */}
+                    <div className="col-md-3">
+                        <input type="text" className="form-control" placeholder="Student Name" name="student_name" value={filters.student_name} onChange={handleFilterChange} />
+                    </div>
+
+                    {/* Email */}
+                    <div className="col-md-3 mt-2">
+                        <input type="text" className="form-control" placeholder="Email" name="email" value={filters.email} onChange={handleFilterChange} />
+                    </div>
+
+                    {/* Mobile */}
+                    <div className="col-md-3 mt-2">
+                        <input type="text" className="form-control" placeholder="Mobile" name="mobile" value={filters.mobile} onChange={handleFilterChange} />
+                    </div>
+
+                    {/* University */}
+                    <div className="col-md-3 mt-2">
+                        <input type="text" className="form-control" placeholder="University" name="university" value={filters.university} onChange={handleFilterChange} />
+                    </div>
+
+                    {/* Profession */}
+                    <div className="col-md-3 mt-2">
+                        <input type="text" className="form-control" placeholder="Profession" name="profession" value={filters.profession} onChange={handleFilterChange} />
+                    </div>
+
+                    {/* Company */}
+                    <div className="col-md-3 mt-2">
+                        <input type="text" className="form-control" placeholder="Company" name="company" value={filters.company} onChange={handleFilterChange} />
+                    </div>
+
+                    {/* isValid Dropdown */}
+                    <div className="col-md-3 mt-2">
+                        <select className="form-control" name="isValid" value={filters.isValid} onChange={handleFilterChange}>
+                            <option value="">All Status</option>
+                            <option value="1">Active</option>
+                            <option value="0">Disabled</option>
+                        </select>
+                    </div>
+
+                    {/* isEnrolled Dropdown */}
+                    <div className="col-md-3 mt-2">
+                        <select className="form-control" name="isEnrolled" value={filters.isEnrolled} onChange={handleFilterChange}>
+                            <option value="">All Enrollment</option>
+                            <option value="1">True</option>
+                            <option value="0">False</option>
+                        </select>
+                    </div>
+                </div>
+
+                {/* Apply Filters Button */}
+                <button className="btn btn-primary mb-3" onClick={fetchStudents}>Apply Filters</button>
+
+                {/* ✅ Show Loading/Error */}
                 {loading ? (
                     <p>Loading students...</p>
                 ) : error ? (
                     <p className="text-danger">{error}</p>
                 ) : (
-                    <div className="table-responsive"> {/* ✅ Ensure Table Scrolls */}
-                        <table className="table table-bordered table-hover w-100"> {/* ✅ Full Width Table */}
+                    <div className="table-responsive">
+                        <table className="table table-bordered table-hover w-100">
                             <thead className="table-dark">
                                 <tr>
                                     <th>CourseId</th>
@@ -74,23 +178,16 @@ export default function StudentList() {
                                     <th>Profession</th>
                                     <th>University</th>
                                     <th>Due</th>
-                                    <th>isValid</th>     
-                                    <th>isEnrolled</th>        
+                                    <th>isValid</th>
+                                    <th>isEnrolled</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredStudents.length > 0 ? (
-                                    filteredStudents.map((student) => {
-                                        const isValid = student.User?.isValid ?? null;
-
+                                {students.length > 0 ? (
+                                    students.map((student) => {
                                         return (
-                                            <tr
-                                                key={student.StudentId}
-                                                style={{
-                                                    backgroundColor: isValid === 1 ? "#d4edda" : isValid === 0 ? "#fff3cd" : "transparent"
-                                                }}
-                                            >
+                                            <tr key={student.StudentId}>
                                                 <td>{student.Course?.courseId || "N/A"}</td>
                                                 <td>{student.batch_no}</td>
                                                 <td>{student.StudentId}</td>
@@ -101,8 +198,8 @@ export default function StudentList() {
                                                 <td>{student.university}</td>
                                                 <td>{student.due}</td>
                                                 <td>
-                                                    <span className={`badge ${isValid === 1 ? "bg-success" : "bg-danger"}`}>
-                                                        {isValid === 1 ? "Active" : "Disabled"}
+                                                    <span className={`badge ${student.User?.isValid === 1 ? "bg-success" : "bg-danger"}`}>
+                                                        {student.User?.isValid === 1 ? "Active" : "Disabled"}
                                                     </span>
                                                 </td>
                                                 <td>
@@ -111,61 +208,27 @@ export default function StudentList() {
                                                     </span>
                                                 </td>
                                                 <td className="d-flex align-items-center">
-                                                    <button 
-                                                        className="btn btn-info btn-sm me-3"
-                                                        onClick={() => router.push(`/students/details/${student.StudentId}`)}
-                                                    >
+                                                    <button className="btn btn-info btn-sm me-2" onClick={() => router.push(`/students/details/${student.StudentId}`)}>
                                                         <FaEye />
                                                     </button>
-                                                    <button 
+                                                    <button
                                                         className="btn btn-info btn-sm"
                                                         onClick={() => router.push(`/students/payments/history/${student.StudentId}`)}
                                                     >
                                                         <FaCcPaypal />
                                                     </button>
                                                 </td>
-                                            
                                             </tr>
                                         );
                                     })
                                 ) : (
-                                    <tr>
-                                        <td colSpan="10" className="text-center text-muted">
-                                            No students found.
-                                        </td>
-                                    </tr>
+                                    <tr><td colSpan="12" className="text-center text-muted">No students found.</td></tr>
                                 )}
                             </tbody>
                         </table>
                     </div>
                 )}
             </div>
-
-            {/* ✅ Add Styles for Mobile */}
-            <style jsx>{`
-                .table-responsive {
-                    overflow-x: auto; /* ✅ Allow table to scroll on small screens */
-                    width: 100%;
-                }
-
-                /* ✅ Ensure Table Expands */
-                table {
-                    min-width: 100%;
-                    max-width: 100%;
-                }
-
-                /* ✅ Adjustments for Small Screens */
-                @media (max-width: 768px) {
-                    .table th, .table td {
-                        font-size: 14px;
-                        padding: 8px;
-                    }
-                    .btn {
-                        padding: 6px 10px;
-                        font-size: 14px;
-                    }
-                }
-            `}</style>
         </div>
     );
 }

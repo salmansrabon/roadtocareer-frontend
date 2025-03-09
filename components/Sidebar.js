@@ -8,19 +8,20 @@ const Sidebar = ({ role, isOpen, toggleSidebar }) => {
 
     const menuItems = role === "admin" 
         ? [
-            { name: "Courses", path: "/courses" },
+            { name: "Create Course", path: "/courses" },
             { name: "Create Package", path: "/create-package" },
             { name: "Create Modules", path: "/modules" },
             { name: "Student List", path: "/student-list" },
             { name: "Payment List", path: "/payments" },
+            { name: "Student Review", path: "/reviews/add" },
             { name: "Attendance", path: "/attendance" },
             { name: "Certificate", path: "/certificate" }
         ]
         : role === "student"
         ? [
-            { name: "Student List", path: "/student-list" },
             { name: "Attendance", path: "/attendance" },
-            { name: "Certificate", path: "/certificate" }
+            { name: "Certificate", path: "/certificate" },
+            { name: "Student Review", path: "/reviews/add" },
         ]
         : [];
 
