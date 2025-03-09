@@ -19,7 +19,7 @@ export default function Login() {
         e.preventDefault();
         setError(""); // ✅ Clear previous errors
         try {
-            const res = await axios.post("http://localhost:5000/api/auth/login", { username, password });
+            const res = await axios.post(process.env.NEXT_PUBLIC_API_URL+"/auth/login", { username, password });
 
             if (res.data.token && res.data.user) {
                 localStorage.setItem("token", res.data.token);

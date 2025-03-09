@@ -9,7 +9,7 @@ export default function CoursesSection() {
     const router = useRouter(); // ✅ Router Instance
 
     useEffect(() => {
-        axios.get("http://localhost:5000/api/courses/list")
+        axios.get(process.env.NEXT_PUBLIC_API_URL+"/courses/list")
             .then((res) => {
                 const enabledCourses = res.data.courses.filter(course => course.is_enabled);
                 setCourses(enabledCourses);

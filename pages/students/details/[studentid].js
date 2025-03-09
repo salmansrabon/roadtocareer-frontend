@@ -18,7 +18,7 @@ export default function StudentDetails() {
     useEffect(() => {
         if (!router.isReady || !studentid) return;
 
-        axios.get(`http://localhost:5000/api/students/${studentid}`)
+        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/students/${studentid}`)
             .then(res => {
                 setStudent(res.data);
                 setFormData(res.data);
@@ -54,10 +54,10 @@ export default function StudentDetails() {
                 isEnrolled: formData.isEnrolled ? 1 : 0,
             };
 
-            await axios.put(`http://localhost:5000/api/students/${studentid}`, updatedData);
+            await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/students/${studentid}`, updatedData);
 
             if (formData.User?.isValid !== originalData.User?.isValid) {
-                const userResponse = await axios.patch(`http://localhost:5000/api/users/${studentid}`, {
+                const userResponse = await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/users/${studentid}`, {
                     isValid: formData.User?.isValid
                 });
 
@@ -92,7 +92,7 @@ export default function StudentDetails() {
         if (!confirm("Are you sure you want to delete this student?")) return;
 
         try {
-            await axios.delete(`http://localhost:5000/api/students/${studentid}`);
+            await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/students/${studentid}`);
             alert("Student deleted successfully.");
             router.push("/student-list");
         } catch (err) {
@@ -102,7 +102,7 @@ export default function StudentDetails() {
 
     const fetchStudentData = async () => {
         try {
-            const res = await axios.get(`http://localhost:5000/api/students/${studentid}`);
+            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/students/${studentid}`);
             setStudent(res.data);
             setFormData(res.data);
             setOriginalData(res.data);

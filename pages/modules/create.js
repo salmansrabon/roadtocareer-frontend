@@ -14,7 +14,7 @@ export default function CreateModule() {
 
     // ✅ Fetch Courses and Packages
     useEffect(() => {
-        axios.get("http://localhost:5000/api/courses/list")
+        axios.get(process.env.NEXT_PUBLIC_API_URL+"/courses/list")
             .then(res => {
                 setCourses(res.data.courses);
             })
@@ -62,7 +62,7 @@ export default function CreateModule() {
         setLoading(true);
 
         try {
-            await axios.post("http://localhost:5000/api/modules/add", {
+            await axios.post(process.env.NEXT_PUBLIC_API_URL+"/modules/add", {
                 courseId: selectedCourseId,
                 packageId: selectedPackageId,
                 module: JSON.stringify(modules)

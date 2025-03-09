@@ -22,7 +22,7 @@ export default function CreatePackage() {
     useEffect(() => {
         const fetchCourses = async () => {
             try {
-                const response = await axios.get("http://localhost:5000/api/courses/list");
+                const response = await axios.get(process.env.NEXT_PUBLIC_API_URL+"/courses/list");
                 setCourses(response.data.courses); // ✅ Set course list
             } catch (err) {
                 console.error("Error fetching courses:", err);
@@ -46,7 +46,7 @@ export default function CreatePackage() {
         setSuccess("");
     
         try {
-            const response = await axios.post("http://localhost:5000/api/packages/create", formData);
+            const response = await axios.post(process.env.NEXT_PUBLIC_API_URL+"/packages/create", formData);
             setSuccess("Package created successfully!");
             setTimeout(() => router.push("/courses"), 2000); // ✅ Redirect after success
         } catch (err) {

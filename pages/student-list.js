@@ -37,7 +37,7 @@ export default function StudentList() {
 
         try {
             const queryParams = new URLSearchParams(filters).toString();
-            const response = await axios.get(`http://localhost:5000/api/students/list?${queryParams}`);
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/students/list?${queryParams}`);
 
             setStudents(response.data.students || []); // ✅ Ensure data is an array
             setTotalStudents(response.data.totalStudents || 0);
@@ -52,7 +52,7 @@ export default function StudentList() {
     // ✅ Fetch Course List
     const fetchCourses = async () => {
         try {
-            const response = await axios.get("http://localhost:5000/api/courses/list");
+            const response = await axios.get(process.env.NEXT_PUBLIC_API_URL+"/courses/list");
             const sortedCourses = response.data.courses.sort((a, b) => b.courseId.localeCompare(a.courseId));
             setCourses(sortedCourses);
         } catch (err) {

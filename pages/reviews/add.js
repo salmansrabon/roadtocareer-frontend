@@ -48,11 +48,11 @@ export default function AddReview() {
             const formDataImage = new FormData();
             formDataImage.append("image", image);
 
-            const imageUploadRes = await axios.post("http://localhost:5000/api/images/upload", formDataImage, {
+            const imageUploadRes = await axios.post(process.env.NEXT_PUBLIC_API_URL+"/images/upload", formDataImage, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
 
-            const uploadedImageUrl = `http://localhost:5000/api${imageUploadRes.data.imageUrl}`; // ✅ Get image URL from response
+            const uploadedImageUrl = process.env.NEXT_PUBLIC_API_URL+`${imageUploadRes.data.imageUrl}`; // ✅ Get image URL from response
 
             // 🔹 Submit Review Data
             const reviewData = {
@@ -60,7 +60,7 @@ export default function AddReview() {
                 image: uploadedImageUrl,
             };
 
-            await axios.post("http://localhost:5000/api/reviews/create", reviewData);
+            await axios.post(process.env.NEXT_PUBLIC_API_URL+"/reviews/create", reviewData);
 
             setMessage("Review added successfully!");
             setLoading(false);

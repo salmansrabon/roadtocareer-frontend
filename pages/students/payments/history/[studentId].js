@@ -29,7 +29,7 @@ export default function PaymentHistory() {
     useEffect(() => {
         if (!studentId) return;
 
-        axios.get(`http://localhost:5000/api/payments/history/${studentId}`)
+        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/payments/history/${studentId}`)
             .then((res) => {
                 const { studentId, student_name, courseId, packageId, courseFee, payments } = res.data;
 
@@ -73,11 +73,11 @@ export default function PaymentHistory() {
         }
 
         try {
-            await axios.post("http://localhost:5000/api/payments/add", studentData);
+            await axios.post(process.env.NEXT_PUBLIC_API_URL+"/payments/add", studentData);
             alert("Payment added successfully!");
 
             // ✅ Refresh Payment History after adding payment
-            axios.get(`http://localhost:5000/api/payments/history/${studentId}`)
+            axios.get(`${process.env.NEXT_PUBLIC_API_URL}/payments/history/${studentId}`)
                 .then((res) => {
                     setPaymentHistory(res.data.payments);
                     setCourseFee(res.data.courseFee);

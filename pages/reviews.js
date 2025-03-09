@@ -13,7 +13,7 @@ export default function Reviews() {
 
     const fetchReviews = async () => {
         try {
-            const response = await axios.get("http://localhost:5000/api/reviews/list");
+            const response = await axios.get(process.env.NEXT_PUBLIC_API_URL+"/reviews/list");
             setReviews(response.data.reviews);
         } catch (err) {
             console.error("Error fetching reviews:", err);

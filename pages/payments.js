@@ -27,7 +27,7 @@ export default function PaymentList() {
 
         try {
             const queryParams = new URLSearchParams(filters).toString();
-            const response = await axios.get(`http://localhost:5000/api/payments?${queryParams}`);
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/payments?${queryParams}`);
 
             setPayments(response.data.payments);
             setTotalPayments(response.data.totalPayments);
@@ -42,7 +42,7 @@ export default function PaymentList() {
     // ✅ Fetch Courses List
     const fetchCourses = async () => {
         try {
-            const response = await axios.get("http://localhost:5000/api/courses/list");
+            const response = await axios.get(process.env.NEXT_PUBLIC_API_URL+"/courses/list");
             setCourses(response.data.courses.sort((a, b) => b.courseId.localeCompare(a.courseId))); // ✅ Sort Descending
         } catch (err) {
             console.error("Failed to fetch courses.");

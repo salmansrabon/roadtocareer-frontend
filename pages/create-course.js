@@ -74,7 +74,7 @@ export default function CreateCourse() {
         setSuccess("");
 
         try {
-            const response = await axios.post("http://localhost:5000/api/courses/create", formData);
+            const response = await axios.post(process.env.NEXT_PUBLIC_API_URL+"/courses/create", formData);
             setSuccess("Course created successfully!");
             setTimeout(() => router.push("/courses"), 2000);
         } catch (err) {

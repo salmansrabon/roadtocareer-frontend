@@ -16,7 +16,7 @@ export default function CourseDetails() {
         if (!courseId) return;
 
         // ✅ Fetch Course Details
-        axios.get(`http://localhost:5000/api/courses/list`)
+        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/courses/list`)
             .then((res) => {
                 const foundCourse = res.data.courses.find(course => course.courseId === courseId);
                 if (foundCourse) {
@@ -32,7 +32,7 @@ export default function CourseDetails() {
             });
 
         // ✅ Fetch Modules for the Course
-        axios.get(`http://localhost:5000/api/modules/${courseId}`)
+        axios.get(process.env.NEXT_PUBLIC_API_URL+`/modules/${courseId}`)
             .then((res) => {
                 if (res.data.modules.length > 0) {
                     // ✅ Parse module JSON for each record

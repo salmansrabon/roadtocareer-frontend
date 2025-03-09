@@ -34,7 +34,7 @@ export default function EnrollStudent() {
         if (!courseId) return;
 
         // ✅ Fetch Course Details (Title & Batch No)
-        axios.get(`http://localhost:5000/api/courses/${courseId}`)
+        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}`)
             .then(res => {
                 setCourseDetails(res.data.course);
                 setPackages(res.data.course.Packages || []); // ✅ Set available packages
@@ -70,7 +70,7 @@ export default function EnrollStudent() {
         }
 
         try {
-            const response = await axios.post("http://localhost:5000/api/students/signup", {
+            const response = await axios.post(process.env.NEXT_PUBLIC_API_URL+"/students/signup", {
                 ...formData,
                 courseId // ✅ Attach courseId from URL
             });

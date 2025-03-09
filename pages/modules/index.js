@@ -10,7 +10,7 @@ export default function ModuleList() {
 
     // ✅ Fetch Module List
     useEffect(() => {
-        axios.get("http://localhost:5000/api/modules/list")
+        axios.get(process.env.NEXT_PUBLIC_API_URL+"/modules/list")
             .then((res) => {
                 setModules(res.data.modules);
                 setLoading(false);

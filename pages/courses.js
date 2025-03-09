@@ -9,7 +9,7 @@ export default function Courses() {
     useEffect(() => {
         const fetchCourses = async () => {
             try {
-                const response = await axios.get("http://localhost:5000/api/courses/list");
+                const response = await axios.get(process.env.NEXT_PUBLIC_API_URL+"/courses/list");
                 setCourses(response.data.courses);
                 setLoading(false);
             } catch (error) {
