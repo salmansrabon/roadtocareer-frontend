@@ -30,16 +30,40 @@ export default function PaymentList() {
         setError("");
 
         try {
+            const token = localStorage.getItem("token"); // ✅ Retrieve Token from Local Storage
             const queryParams = new URLSearchParams({ ...filters, page: currentPage, limit }).toString();
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/payments?${queryParams}`);
 
-            setPayments(response.data.payments);
-            setTotalPayments(response.data.totalPayments);
-            setTotalPaidAmount(response.data.totalPaidAmount);
-            setTotalPages(response.data.totalPages);
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/payments?${queryParams}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`, // ✅ Attach Token in Header
+                },
+            });
+
+            if (response.status === 200) {
+                setPayments(response.data.payments);
+                setTotalPayments(response.data.totalPayments);
+                setTotalPaidAmount(response.data.totalPaidAmount);
+                setTotalPages(response.data.totalPages);
+                setError(""); // ✅ Clear any previous errors
+            }
         } catch (err) {
-            setError("Failed to fetch payments.");
+            console.error("Error fetching payments:", err);
+
+            if (err.response) {
+                // ✅ Handle Unauthorized (401) or Forbidden (403) Responses
+                if (err.response.status === 401) {
+                    setError("Unauthorized Access: " + err.response.data.message);
+                } else if (err.response.status === 403) {
+                    setError(err.response.data.message);
+                } else {
+                    setError("Failed to fetch payments: " + err.response.data.message);
+                }
+            } else {
+                // ✅ Handle Network Errors or Unexpected Issues
+                setError("Failed to fetch payments. Please check your connection.");
+            }
         }
+
 
         setLoading(false);
     };
@@ -50,7 +74,7 @@ export default function PaymentList() {
             const response = await axios.get(process.env.NEXT_PUBLIC_API_URL + "/courses/list");
             setCourses(response.data.courses.sort((a, b) => b.courseId.localeCompare(a.courseId)));
         } catch (err) {
-            console.error("Failed to fetch courses.");
+            console.error("Failed to fetch courses." + response.data.message);
         }
     };
 

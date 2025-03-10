@@ -28,37 +28,61 @@ export default function PaymentHistory() {
     // ✅ Fetch Payment History & Student Data
     useEffect(() => {
         if (!studentId) return;
-
-        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/payments/history/${studentId}`)
-            .then((res) => {
-                const { studentId, student_name, courseId, packageId, courseFee, payments } = res.data;
-
-                setPaymentHistory(payments);
-                setCourseFee(courseFee);
-
-                // ✅ Calculate remaining balance (latest payment entry)
-                if (payments.length > 0) {
-                    setRemainingBalance(payments[payments.length - 1].remainingBalance);
+    
+        const token = localStorage.getItem("token");
+        setLoading(true);
+        setError("");
+    
+        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/payments/history/${studentId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`, // ✅ Attach Token in Header
+            }
+        })
+        .then((res) => {
+            const { studentId, student_name, courseId, packageId, courseFee, payments } = res.data;
+    
+            setPaymentHistory(payments);
+            setCourseFee(courseFee);
+    
+            // ✅ Calculate remaining balance (latest payment entry)
+            if (payments.length > 0) {
+                setRemainingBalance(payments[payments.length - 1].remainingBalance);
+            } else {
+                setRemainingBalance(courseFee);
+            }
+    
+            // ✅ Update studentData from the API response
+            setStudentData((prev) => ({
+                ...prev,
+                studentId,
+                studentName: student_name,
+                courseId,
+                packageId
+            }));
+        })
+        .catch((err) => {
+            console.error("Error fetching payment history:", err);
+    
+            if (err.response) {
+                // ✅ Handle Unauthorized (401) or Forbidden (403) Responses
+                if (err.response.status === 401) {
+                    setError("Unauthorized Access: " + err.response.data.message);
+                } else if (err.response.status === 403) {
+                    setError("Forbidden: " + err.response.data.message);
                 } else {
-                    setRemainingBalance(courseFee);
+                    setError("Failed to fetch payment history: " + err.response.data.message);
                 }
-
-                // ✅ Update studentData from the API response
-                setStudentData((prev) => ({
-                    ...prev,
-                    studentId,
-                    studentName: student_name,
-                    courseId,
-                    packageId
-                }));
-            })
-            .catch((err) => {
-                console.error("Error fetching payment history:", err);
-                setError("Failed to fetch payment history.");
-            });
-
-        setLoading(false);
+            } else {
+                // ✅ Handle Network Errors or Unexpected Issues
+                setError("Failed to fetch payment history. Please check your connection.");
+            }
+        })
+        .finally(() => {
+            setLoading(false);
+        });
+    
     }, [studentId]);
+    
 
     // ✅ Handle Input Change
     const handleChange = (e) => {
@@ -73,11 +97,20 @@ export default function PaymentHistory() {
         }
 
         try {
-            await axios.post(process.env.NEXT_PUBLIC_API_URL+"/payments/add", studentData);
+            const token = localStorage.getItem("token");
+            await axios.post(process.env.NEXT_PUBLIC_API_URL + "/payments/add", studentData, {
+                headers: {
+                    Authorization: `Bearer ${token}`, // ✅ Attach Token in Header
+                }
+            });
             alert("Payment added successfully!");
 
             // ✅ Refresh Payment History after adding payment
-            axios.get(`${process.env.NEXT_PUBLIC_API_URL}/payments/history/${studentId}`)
+            axios.get(`${process.env.NEXT_PUBLIC_API_URL}/payments/history/${studentId}`,{
+                headers: {
+                    Authorization: `Bearer ${token}`, // ✅ Attach Token in Header
+                }
+            })
                 .then((res) => {
                     setPaymentHistory(res.data.payments);
                     setCourseFee(res.data.courseFee);
@@ -113,7 +146,7 @@ export default function PaymentHistory() {
                 {loading ? <p>Loading payments...</p> : error ? <p className="text-danger">{error}</p> : (
                     <>
                         <h4 className="fw-bold text-dark">Total Course Fee: {courseFee} TK</h4>
-                        <h5 className="fw-bold text-danger">Remaining Balance: {remainingBalance} TK</h5> {/* ✅ Display Remaining Balance */}
+                        <h5 className="fw-bold text-danger">Remaining Due: {remainingBalance} TK</h5> {/* ✅ Display Remaining Balance */}
 
                         {/* ✅ Add New Payment Form */}
                         <div className="card p-3 mb-4">

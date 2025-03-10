@@ -44,14 +44,38 @@ export default function StudentList() {
                 page: currentPage,
                 limit: studentsPerPage,
             }).toString();
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/students/list?${queryParams}`);
+
+            const token = localStorage.getItem("token");
+
+            const response = await axios.get(
+                `${process.env.NEXT_PUBLIC_API_URL}/students/list?${queryParams}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`, // ✅ Attach Token in Header
+                    }
+                }
+            );
 
             setStudents(response.data.students || []); // ✅ Ensure data is an array
             setTotalStudents(response.data.totalStudents || 0);
         } catch (err) {
             console.error("Error fetching students:", err);
-            setError("Failed to fetch student list.");
+
+            if (err.response) {
+                // ✅ Handle Unauthorized (401) and Forbidden (403) responses
+                if (err.response.status === 401) {
+                    setError("Unauthorized Access: " + err.response.data.message);
+                } else if (err.response.status === 403) {
+                    setError("Forbidden: " + err.response.data.message);
+                } else {
+                    setError("Failed to fetch student list: " + err.response.data.message);
+                }
+            } else {
+                // ✅ Handle Network Errors
+                setError("Failed to fetch student list. Please check your connection.");
+            }
         }
+
 
         setLoading(false);
     };
@@ -59,7 +83,7 @@ export default function StudentList() {
     // ✅ Fetch Course List
     const fetchCourses = async () => {
         try {
-            const response = await axios.get(process.env.NEXT_PUBLIC_API_URL+"/courses/list");
+            const response = await axios.get(process.env.NEXT_PUBLIC_API_URL + "/courses/list");
             const sortedCourses = response.data.courses.sort((a, b) => b.courseId.localeCompare(a.courseId));
             setCourses(sortedCourses);
         } catch (err) {
@@ -236,10 +260,10 @@ export default function StudentList() {
                     </div>
                 )}
                 {/* ✅ Pagination Component */}
-                <Pagination 
-                    currentPage={currentPage} 
-                    totalPages={Math.ceil(totalStudents / studentsPerPage)} 
-                    onPageChange={setCurrentPage} 
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={Math.ceil(totalStudents / studentsPerPage)}
+                    onPageChange={setCurrentPage}
                 />
             </div>
         </div>

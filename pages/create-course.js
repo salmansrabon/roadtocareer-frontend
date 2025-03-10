@@ -74,15 +74,49 @@ export default function CreateCourse() {
         setSuccess("");
 
         try {
-            const response = await axios.post(process.env.NEXT_PUBLIC_API_URL+"/courses/create", formData);
-            setSuccess("Course created successfully!");
-            setTimeout(() => router.push("/courses"), 2000);
+            const token = localStorage.getItem("token");
+        
+            const response = await axios.post(
+                process.env.NEXT_PUBLIC_API_URL + "/courses/create",
+                formData,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`, // ✅ Attach Token in Header
+                    },
+                }
+            );
+        
+            if (response.status === 201) {
+                setSuccess("Course created successfully!");
+                setTimeout(() => router.push("/courses"), 2000);
+            } else {
+                setError("Unexpected response from server. Please try again.");
+            }
         } catch (err) {
             console.error("Error creating course:", err);
-            setError("Failed to create course. Please try again.");
+        
+            if (err.response) {
+                // ✅ Handle Specific Response Errors
+                if (err.response.status === 400) {
+                    setError("Bad Request: " + err.response.data.message);
+                } else if (err.response.status === 401) {
+                    setError("Unauthorized Access: " + err.response.data.message);
+                } else if (err.response.status === 403) {
+                    setError("Forbidden: You do not have permission to create a course.");
+                } else if (err.response.status === 409) {
+                    setError("Conflict: Course already exists.");
+                } else if (err.response.status === 500) {
+                    setError("Server Error: Please try again later.");
+                } else {
+                    setError("Error: " + err.response.data.message);
+                }
+            } else {
+                // ✅ Handle Network Errors
+                setError("Failed to create course. Please check your internet connection.");
+            }
         } finally {
             setLoading(false);
-        }
+        }        
     };
 
     return (
