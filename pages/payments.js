@@ -9,6 +9,10 @@ export default function PaymentList() {
     const [error, setError] = useState("");
     const [totalPaidAmount, setTotalPaidAmount] = useState(0);
     const [totalPayments, setTotalPayments] = useState(0);
+    const [totalPages, setTotalPages] = useState(1);
+    const [currentPage, setCurrentPage] = useState(1);
+    const limit = 10; // ✅ Set limit per page
+
     const [filters, setFilters] = useState({
         studentId: "",
         courseId: "",
@@ -17,21 +21,22 @@ export default function PaymentList() {
 
     useEffect(() => {
         fetchPayments();
-        fetchCourses(); // ✅ Fetch Course List
-    }, []);
+        fetchCourses();
+    }, [currentPage]); // ✅ Re-fetch payments when page changes
 
-    // ✅ Fetch Payments from API with filters
+    // ✅ Fetch Payments from API with Pagination
     const fetchPayments = async () => {
         setLoading(true);
         setError("");
 
         try {
-            const queryParams = new URLSearchParams(filters).toString();
+            const queryParams = new URLSearchParams({ ...filters, page: currentPage, limit }).toString();
             const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/payments?${queryParams}`);
 
             setPayments(response.data.payments);
             setTotalPayments(response.data.totalPayments);
             setTotalPaidAmount(response.data.totalPaidAmount);
+            setTotalPages(response.data.totalPages);
         } catch (err) {
             setError("Failed to fetch payments.");
         }
@@ -42,8 +47,8 @@ export default function PaymentList() {
     // ✅ Fetch Courses List
     const fetchCourses = async () => {
         try {
-            const response = await axios.get(process.env.NEXT_PUBLIC_API_URL+"/courses/list");
-            setCourses(response.data.courses.sort((a, b) => b.courseId.localeCompare(a.courseId))); // ✅ Sort Descending
+            const response = await axios.get(process.env.NEXT_PUBLIC_API_URL + "/courses/list");
+            setCourses(response.data.courses.sort((a, b) => b.courseId.localeCompare(a.courseId)));
         } catch (err) {
             console.error("Failed to fetch courses.");
         }
@@ -55,10 +60,17 @@ export default function PaymentList() {
         setFilters((prev) => ({ ...prev, [name]: value }));
     };
 
+    // ✅ Handle Page Change
+    const handlePageChange = (page) => {
+        if (page >= 1 && page <= totalPages) {
+            setCurrentPage(page);
+        }
+    };
+
     return (
         <div className="container mt-5">
             <h2 className="fw-bold text-primary text-center mb-4">
-                Payment List ({totalPayments}) 
+                Payment List ({totalPayments})
             </h2>
 
             <h5 className="text-center text-success mb-4">
@@ -78,12 +90,7 @@ export default function PaymentList() {
                     />
                 </div>
                 <div className="col-md-4">
-                    <select
-                        className="form-control"
-                        name="courseId"
-                        value={filters.courseId}
-                        onChange={handleFilterChange}
-                    >
+                    <select className="form-control" name="courseId" value={filters.courseId} onChange={handleFilterChange}>
                         <option value="">All Courses</option>
                         {courses.map((course) => (
                             <option key={course.courseId} value={course.courseId}>
@@ -93,17 +100,9 @@ export default function PaymentList() {
                     </select>
                 </div>
                 <div className="col-md-4">
-                    <select
-                        className="form-control"
-                        name="month"
-                        value={filters.month}
-                        onChange={handleFilterChange}
-                    >
+                    <select className="form-control" name="month" value={filters.month} onChange={handleFilterChange}>
                         <option value="">All Months</option>
-                        {[
-                            "January", "February", "March", "April", "May", "June",
-                            "July", "August", "September", "October", "November", "December"
-                        ].map((month) => (
+                        {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].map((month) => (
                             <option key={month} value={month}>{month}</option>
                         ))}
                     </select>
@@ -157,6 +156,13 @@ export default function PaymentList() {
                     )}
                 </tbody>
             </table>
+
+            {/* ✅ Pagination Controls */}
+            <div className="pagination d-flex justify-content-center mt-4">
+                <button className="btn btn-primary me-2" disabled={currentPage === 1} onClick={() => handlePageChange(currentPage - 1)}>Previous</button>
+                <span className="fw-bold mx-3">Page {currentPage} of {totalPages}</span>
+                <button className="btn btn-primary" disabled={currentPage === totalPages} onClick={() => handlePageChange(currentPage + 1)}>Next</button>
+            </div>
         </div>
     );
 }

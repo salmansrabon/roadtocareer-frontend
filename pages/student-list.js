@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
 import { FaCcPaypal, FaEye } from "react-icons/fa";
+import Pagination from "../components/common/Pagination";
 
 export default function StudentList() {
     const [students, setStudents] = useState([]);
@@ -9,6 +10,8 @@ export default function StudentList() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [courses, setCourses] = useState([]); // ✅ Store courses list
+    const [currentPage, setCurrentPage] = useState(1);
+    const studentsPerPage = 10;
     const [filters, setFilters] = useState({
         courseId: "",
         batch_no: "",
@@ -28,7 +31,7 @@ export default function StudentList() {
     useEffect(() => {
         fetchStudents();
         fetchCourses();
-    }, []);
+    }, [currentPage, filters]);
 
     // ✅ Fetch Students from API with Filters
     const fetchStudents = async () => {
@@ -36,7 +39,11 @@ export default function StudentList() {
         setError("");
 
         try {
-            const queryParams = new URLSearchParams(filters).toString();
+            const queryParams = new URLSearchParams({
+                ...filters,
+                page: currentPage,
+                limit: studentsPerPage,
+            }).toString();
             const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/students/list?${queryParams}`);
 
             setStudents(response.data.students || []); // ✅ Ensure data is an array
@@ -228,6 +235,12 @@ export default function StudentList() {
                         </table>
                     </div>
                 )}
+                {/* ✅ Pagination Component */}
+                <Pagination 
+                    currentPage={currentPage} 
+                    totalPages={Math.ceil(totalStudents / studentsPerPage)} 
+                    onPageChange={setCurrentPage} 
+                />
             </div>
         </div>
     );

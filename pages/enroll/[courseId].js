@@ -1,10 +1,16 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
+import universitiesData from "/public/data/universities.json";
 
 export default function EnrollStudent() {
     const router = useRouter();
     const { courseId } = router.query; // ✅ Get courseId from URL
+
+    const [universities, setUniversities] = useState([]); // ✅ Store university names
+    const [filteredUniversities, setFilteredUniversities] = useState([]); // ✅ Filtered universities
+    const [search, setSearch] = useState(""); // ✅ Search input
+    const [showDropdown, setShowDropdown] = useState(false);
 
     const [formData, setFormData] = useState({
         salutation: "Mr",
@@ -41,6 +47,16 @@ export default function EnrollStudent() {
             })
             .catch(err => console.error("Error fetching course details:", err));
     }, [courseId]);
+    // ✅ Load Universities & Sort Alphabetically
+    useEffect(() => {
+        const sortedUniversities = universitiesData.university
+            .map((uni) => uni.name)
+            .sort(); // Sort alphabetically
+
+        setUniversities(sortedUniversities);
+        setFilteredUniversities(sortedUniversities.slice(0, 5)); // Show first 5 by default
+    }, []);
+
 
     // ✅ Handle Input Changes
     const handleChange = (e) => {
@@ -54,6 +70,28 @@ export default function EnrollStudent() {
         if (name === "profession") {
             setIsJobHolder(value === "Job Holder");
         }
+    };
+    const handleInputChange = (e) => {
+        const value = e.target.value;
+        setSearch(value);
+        handleChange(e); // ✅ Update parent state
+
+        if (value.length === 0) {
+            setFilteredUniversities(universities.slice(0, 5)); // Show default 5 when empty
+            setShowDropdown(false);
+        } else {
+            const filtered = universities.filter((uni) =>
+                uni.toLowerCase().includes(value.toLowerCase())
+            );
+            setFilteredUniversities(filtered.slice(0, 5)); // Show up to 5 matches
+            setShowDropdown(true);
+        }
+    };
+    // ✅ Handle Selection
+    const handleSelect = (selectedUniversity) => {
+        setSearch(selectedUniversity);
+        setShowDropdown(false);
+        handleChange({ target: { name: "university", value: selectedUniversity } }); // ✅ Update Parent
     };
 
     // ✅ Handle Form Submission
@@ -70,19 +108,28 @@ export default function EnrollStudent() {
         }
 
         try {
-            const response = await axios.post(process.env.NEXT_PUBLIC_API_URL+"/students/signup", {
+            await axios.post(process.env.NEXT_PUBLIC_API_URL + "/students/signup", {
                 ...formData,
                 courseId // ✅ Attach courseId from URL
             });
-
+        
             setSuccess("Registration successful! Check your email for the confirmation.");
-            //setTimeout(() => router.push("/login"), 3000);
+            // setTimeout(() => router.push("/login"), 3000);
         } catch (err) {
             console.error("Error registering student:", err);
-            setError("Failed to register. Please try again.");
+        
+            // ✅ Ensure API Error Message is extracted correctly
+            const apiErrorMessage =
+                err.response && err.response.data && err.response.data.message
+                    ? err.response.data.message
+                    : "An error occurred. Please contact admin\nWhatsApp: 01782808778";
+        
+            setError(apiErrorMessage);
         } finally {
             setLoading(false);
         }
+        
+
     };
 
     return (
@@ -146,10 +193,36 @@ export default function EnrollStudent() {
                         </div>
 
                         {/* ✅ University */}
-                        <div className="col-md-6">
+                        <div className="col-md-6 position-relative">
                             <label className="form-label fw-bold">University</label>
-                            <input type="text" className="form-control border-primary p-3" name="university" onChange={handleChange} />
+                            <input
+                                type="text"
+                                className="form-control border-primary p-3"
+                                name="university"
+                                value={search}
+                                required
+                                onChange={handleInputChange}
+                                onFocus={() => setShowDropdown(true)}
+                                autoComplete="off"
+                            />
+
+                            {/* ✅ Dropdown List */}
+                            {showDropdown && filteredUniversities.length > 0 && (
+                                <ul className="list-group position-absolute w-100" style={{ zIndex: 10 }}>
+                                    {filteredUniversities.map((uni, index) => (
+                                        <li
+                                            key={index}
+                                            className="list-group-item list-group-item-action"
+                                            onClick={() => handleSelect(uni)}
+                                            style={{ cursor: "pointer" }}
+                                        >
+                                            {uni}
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
                         </div>
+
 
                         {/* ✅ Passing Year */}
                         <div className="col-md-6">
