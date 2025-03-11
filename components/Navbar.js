@@ -75,6 +75,13 @@ const Navbar = () => {
                                 My Profile
                             </li>
                             <li 
+                                className="p-2 text-dark" 
+                                onClick={() => { setShowDropdown(false); router.push("/change-password"); }} 
+                                style={{ cursor: "pointer" }}
+                            >
+                                Change Password
+                            </li>
+                            <li 
                                 className="p-2 text-danger" 
                                 onClick={handleLogout} 
                                 style={{ cursor: "pointer" }}
