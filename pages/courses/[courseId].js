@@ -11,6 +11,7 @@ export default function CourseDetails() {
     const [modules, setModules] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [expandedIndex, setExpandedIndex] = useState(null); // ✅ Expand & Collapse Feature
 
     useEffect(() => {
         if (!courseId) return;
@@ -32,10 +33,9 @@ export default function CourseDetails() {
             });
 
         // ✅ Fetch Modules for the Course
-        axios.get(process.env.NEXT_PUBLIC_API_URL+`/modules/${courseId}`)
+        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/modules/${courseId}`)
             .then((res) => {
                 if (res.data.modules.length > 0) {
-                    // ✅ Parse module JSON for each record
                     const parsedModules = res.data.modules.flatMap(mod => JSON.parse(mod.module));
                     setModules(parsedModules);
                 } else {
@@ -47,6 +47,11 @@ export default function CourseDetails() {
             });
     }, [courseId]);
 
+    // ✅ Expand/Collapse Module Description
+    const handleToggle = (index) => {
+        setExpandedIndex((prevIndex) => (prevIndex === index ? null : index));
+    };
+
     return (
         <section className="container course-details-page">
             {loading ? (
@@ -54,53 +59,104 @@ export default function CourseDetails() {
             ) : error ? (
                 <p className="text-danger text-center">{error}</p>
             ) : (
-                <div className="row">
+                <div className="row justify-content-center">
                     {/* ✅ Course Details */}
                     <div className="col-md-6">
-                        <div className="card shadow-lg border-0">
-                            <img src={course.course_image} className="card-img-top" alt={course.course_title} />
-                            <div className="card-body">
+                        <div className="card shadow-lg border-0 rounded-4 overflow-hidden hover-scale">
+                            <img 
+                                src={course.course_image} 
+                                className="card-img-top object-fit-cover"
+                                alt={course.course_title} 
+                                style={{ height: "300px", objectFit: "cover" }} 
+                            />
+                            <div className="card-body text-center">
                                 <h3 className="card-title text-dark fw-bold">{course.course_title}</h3>
                                 <p className="card-text text-muted">
-                                    <strong>Batch:</strong> {course.batch_no} <br />
-                                    <strong>Package:</strong> {course.Packages[0]?.packageName || "N/A"} <br />
-                                    <strong>Course Fee:</strong> <span className="text-success">{course.Packages[0]?.jobholderFee || "N/A"} TK</span> <br />
-                                    <strong>After discount:</strong> <span className="text-primary">{course.Packages[0]?.studentFee || "N/A"} TK</span><br/>
-                                    <Link href={`/enroll/${course.courseId}`}>
-                                        <button className="btn btn-success">Enroll Now</button>
-                                    </Link>
+                                    <strong>Batch:</strong> <span className="text-primary">{course.batch_no}</span> <br />
+                                    <strong>Package:</strong> <span className="text-warning">{course.Packages[0]?.packageName || "N/A"}</span> <br />
+                                    <strong>Course Fee:</strong> <span className="text-danger fw-bold">{course.Packages[0]?.jobholderFee || "N/A"} TK</span> <br />
+                                    <strong>After Discount:</strong> <span className="text-success fw-bold">{course.Packages[0]?.studentFee || "N/A"} TK</span> 
                                 </p>
+                                <Link href={`/enroll/${course.courseId}`} passHref>
+                                    <button className="btn btn-lg btn-success w-100 fw-bold shadow-sm mt-2">
+                                        Enroll Now 🚀
+                                    </button>
+                                </Link>
                             </div>
                         </div>
                     </div>
 
-                    {/* ✅ Modules List */}
+                    {/* ✅ Modules List with Expand/Collapse */}
                     <div className="col-md-6">
-                        <h3 className="fw-bold text-dark mb-3">📌 Course Modules</h3>
-                        {modules.length > 0 ? (
-                            <ul className="list-group">
-                                {modules.map((mod, index) => (
-                                    <li key={index} className="list-group-item">
-                                        <strong>{mod.title}</strong>: {mod.description}
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : (
-                            <p className="text-muted">No modules found for this course.</p>
-                        )}
+                        <div className="card shadow-lg border-0 rounded-4 p-4">
+                            <h3 className="fw-bold text-dark text-center mb-3">📌 Course Modules</h3>
+                            {modules.length > 0 ? (
+                                <ul className="list-group list-group-flush">
+                                    {modules.map((mod, index) => (
+                                        <li 
+                                            key={index} 
+                                            className="list-group-item border-0 text-muted p-2"
+                                            style={{ fontSize: "16px", cursor: "pointer", transition: "0.3s" }}
+                                            onClick={() => handleToggle(index)} // ✅ Expand/collapse on click
+                                        >
+                                            <strong className="d-flex justify-content-between">
+                                                {mod.title}
+                                                <span>{expandedIndex === index ? "🔽" : "▶️"}</span>
+                                            </strong>
+
+                                            {/* ✅ Description shows when expanded */}
+                                            {expandedIndex === index && (
+                                                <p className="mt-2 text-dark description">
+                                                    {mod.description}
+                                                </p>
+                                            )}
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p className="text-center text-muted">No modules found for this course.</p>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}
 
-            {/* ✅ CSS Fix for Top Margin */}
+            {/* ✅ CSS for Styling */}
             <style jsx>{`
                 .course-details-page {
                     margin-top: 100px; /* Ensures space below navbar */
                 }
 
+                .card {
+                    transition: transform 0.3s ease-in-out;
+                }
+
+                .hover-scale:hover {
+                    transform: scale(1.02); /* ✅ Slight hover effect */
+                }
+
+                .object-fit-cover {
+                    object-fit: cover;
+                }
+
+                .list-group-item {
+                    background: #fff;
+                    border-bottom: 1px solid #ddd;
+                }
+
+                .list-group-item:hover {
+                    background: #f9f9f9;
+                }
+
+                .description {
+                    padding: 10px;
+                    background: #eef5ff;
+                    border-radius: 5px;
+                }
+
                 @media (max-width: 768px) {
                     .course-details-page {
-                        margin-top: 120px; /* More space on mobile for readability */
+                        margin-top: 120px; /* More space on mobile */
                     }
                 }
             `}</style>

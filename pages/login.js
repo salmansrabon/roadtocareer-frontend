@@ -19,7 +19,7 @@ export default function Login() {
         e.preventDefault();
         setError(""); // ✅ Clear previous errors
         try {
-            const res = await axios.post(process.env.NEXT_PUBLIC_API_URL+"/auth/login", { username, password });
+            const res = await axios.post(process.env.NEXT_PUBLIC_API_URL + "/auth/login", { username, password });
 
             if (res.data.token && res.data.user) {
                 localStorage.setItem("token", res.data.token);
@@ -49,26 +49,30 @@ export default function Login() {
                 <form onSubmit={handleSubmit}>
                     <div className="mb-3">
                         <label className="form-label">Username</label>
-                        <input 
-                            type="text" 
-                            className="form-control" 
-                            placeholder="Enter username" 
-                            onChange={(e) => setUsername(e.target.value)} 
-                            required 
+                        <input
+                            type="text"
+                            className="form-control"
+                            placeholder="Enter username"
+                            onChange={(e) => setUsername(e.target.value)}
+                            required
                         />
                     </div>
                     <div className="mb-3">
                         <label className="form-label">Password</label>
-                        <input 
-                            type="password" 
-                            className="form-control" 
-                            placeholder="Enter password" 
-                            onChange={(e) => setPassword(e.target.value)} 
-                            required 
+                        <input
+                            type="password"
+                            className="form-control"
+                            placeholder="Enter password"
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
                         />
                     </div>
                     <button type="submit" className="btn btn-primary w-100">Login</button>
                 </form>
+                {/* ✅ Reset Password Link */}
+                <div className="text-center mt-3">
+                    <a href="/reset-password" className="text-primary fw-bold">Forgot Password?</a>
+                </div>
             </div>
         </div>
     );

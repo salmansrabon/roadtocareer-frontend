@@ -30,7 +30,9 @@ const FrontPageLayout = ({ children }) => {
             {/* ✅ Responsive Navbar */}
             <nav className="navbar fixed-top navbar-dark bg-dark px-4 d-flex justify-content-between">
                 <h2 className="text-warning" style={{ cursor: "pointer" }}>
-                    Road to SDET
+                    <a href={process.env.NEXT_PUBLIC_FRONTEND_URL} className="text-warning text-decoration-none">
+                        Road to SDET
+                    </a>
                 </h2>
 
                 {/* ✅ Mobile Menu Toggle Button */}
