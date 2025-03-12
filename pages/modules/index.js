@@ -10,17 +10,38 @@ export default function ModuleList() {
 
     // ✅ Fetch Module List
     useEffect(() => {
-        axios.get(process.env.NEXT_PUBLIC_API_URL + "/modules/list")
-            .then((res) => {
-                setModules(res.data.modules);
-                setLoading(false);
-            })
-            .catch((err) => {
-                console.error("Error fetching modules:", err);
-                setError("Failed to fetch module list.");
-                setLoading(false);
-            });
+        fetchModules();
     }, []);
+
+    const fetchModules = async () => {
+        try {
+            const response = await axios.get(process.env.NEXT_PUBLIC_API_URL + "/modules/list");
+            setModules(response.data.modules);
+            setLoading(false);
+        } catch (err) {
+            console.error("Error fetching modules:", err);
+            setError("Failed to fetch module list.");
+            setLoading(false);
+        }
+    };
+
+    // ✅ Handle Delete Module
+    const handleDelete = async (courseId) => {
+        if (!confirm("Are you sure you want to delete this module?")) return;
+
+        try {
+            const token = localStorage.getItem("token"); // Retrieve authentication token
+            await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/modules/delete/${courseId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            alert("Module deleted successfully!");
+            fetchModules(); // Refresh the module list
+        } catch (err) {
+            console.error("Error deleting module:", err);
+            alert("Failed to delete module.");
+        }
+    };
 
     return (
         <div className="container mt-4">
@@ -46,6 +67,7 @@ export default function ModuleList() {
                                 <th>Course ID</th>
                                 <th>Package ID</th>
                                 <th>Modules</th>
+                                <th>Actions</th> {/* Added Actions Column */}
                             </tr>
                         </thead>
                         <tbody>
@@ -59,8 +81,13 @@ export default function ModuleList() {
                                             <ul>
                                                 {(() => {
                                                     try {
-                                                        const parsedModules = typeof module.module === "string" ? JSON.parse(module.module) : module.module;
-                                                        if (!Array.isArray(parsedModules)) return <li className="text-danger">Invalid module format</li>;
+                                                        const parsedModules = typeof module.module === "string" 
+                                                            ? JSON.parse(module.module) 
+                                                            : module.module;
+
+                                                        if (!Array.isArray(parsedModules)) {
+                                                            return <li className="text-danger">Invalid module format</li>;
+                                                        }
 
                                                         return parsedModules.map((m, index) => (
                                                             <li key={index}>
@@ -77,17 +104,24 @@ export default function ModuleList() {
 
                                         <td>
                                             <button
-                                                className="btn btn-warning btn-sm"
+                                                className="btn btn-warning btn-sm me-2"
                                                 onClick={() => router.push(`/modules/edit/${module.courseId}`)}
                                             >
                                                 Edit
+                                            </button>
+
+                                            <button
+                                                className="btn btn-danger btn-sm"
+                                                onClick={() => handleDelete(module.courseId)}
+                                            >
+                                                Delete
                                             </button>
                                         </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="4" className="text-center text-muted">
+                                    <td colSpan="5" className="text-center text-muted">
                                         No modules found.
                                     </td>
                                 </tr>
