@@ -20,9 +20,9 @@ const Sidebar = ({ role, isOpen, toggleSidebar }) => {
         ]
         : role === "student"
         ? [
+            { name: "My Dashboard", path: "/mydashboard" },
             { name: "Attendance", path: "/attendance" },
-            { name: "Certificate", path: "/certificate" },
-            { name: "Student Review", path: "/reviews/add" },
+            { name: "Certificate", path: "/certificate" }
         ]
         : [];
 

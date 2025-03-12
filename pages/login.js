@@ -24,7 +24,13 @@ export default function Login() {
             if (res.data.token && res.data.user) {
                 localStorage.setItem("token", res.data.token);
                 localStorage.setItem("user", JSON.stringify(res.data.user)); // ✅ Store user data
-                router.push("/dashboard");
+    
+                // ✅ Redirect based on user role
+                if (res.data.user.role === "student") {
+                    router.push("/mydashboard"); // ✅ Redirect student
+                } else {
+                    router.push("/dashboard"); // ✅ Redirect admin/staff
+                }
             } else {
                 setError("Invalid response from server.");
             }

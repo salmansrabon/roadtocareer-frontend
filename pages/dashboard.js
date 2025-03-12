@@ -42,28 +42,31 @@ export default function Dashboard() {
     const fetchDashboardData = async () => {
         setLoading(true);
         setError("");
-
+    
         try {
-            // ✅ Fetch Payments Data
             const token = localStorage.getItem("token");
-            const paymentResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/payments?courseId=${selectedCourse}&month=${selectedMonth}`,{
-                headers: {
-                    Authorization: `Bearer ${token}`, // ✅ Attach Token in Header
-                },
+            if (!token) {
+                router.push("/login");
+                return;
+            }
+    
+            // ✅ Fetch Payments Data
+            const paymentResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/payments?courseId=${selectedCourse}&month=${selectedMonth}`, {
+                headers: { Authorization: `Bearer ${token}` },
             });
+    
             setTotalPaidAmount(paymentResponse.data.totalPaidAmount);
-
+    
             // ✅ Fetch Students Data to Calculate Unpaid & Due
-            const studentsResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/students/list?courseId=${selectedCourse}`,{
-                headers: {
-                    Authorization: `Bearer ${token}`, // ✅ Attach Token in Header
-                },
+            const studentsResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/students/list?courseId=${selectedCourse}`, {
+                headers: { Authorization: `Bearer ${token}` },
             });
+    
             const students = studentsResponse.data.students || [];
-            
+    
             let totalDue = 0;
             let unpaidCount = 0;
-
+    
             students.forEach(student => {
                 // ✅ Ignore students who are not enrolled
                 if (!student.isEnrolled) return;
@@ -74,18 +77,33 @@ export default function Dashboard() {
     
                 totalDue += parseFloat(student.due || 0); // ✅ Sum total due
             });
-
+    
             setTotalDueAmount(totalDue);
             setUnpaidStudents(unpaidCount);
+    
         } catch (err) {
             console.error("Error fetching dashboard data:", err);
-            setError("Failed to load dashboard data.");
-            localStorage.removeItem("token");
-            router.push("/login"); // ✅ Redirect to login
+    
+            if (err.response) {
+                // ✅ Handle Unauthorized (401) or Forbidden (403)
+                if (err.response.status === 401 || err.response.status === 403) {
+                    alert("Session expired. Please log in again.");
+                    localStorage.removeItem("token"); // ✅ Remove invalid token
+                    router.push("/login"); // ✅ Redirect to login page
+                    return;
+                }
+    
+                // ✅ Handle other API errors
+                setError(err.response.data?.message || "Failed to load dashboard data.");
+            } else {
+                // ✅ Handle Network or Unexpected Errors
+                setError("Network error. Please check your internet connection.");
+            }
         }
-
+    
         setLoading(false);
     };
+    
 
     return (
         <div className="container mt-5">
