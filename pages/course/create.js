@@ -75,7 +75,7 @@ export default function CreateCourse() {
 
         try {
             const token = localStorage.getItem("token");
-        
+
             const response = await axios.post(
                 process.env.NEXT_PUBLIC_API_URL + "/courses/create",
                 formData,
@@ -85,7 +85,7 @@ export default function CreateCourse() {
                     },
                 }
             );
-        
+
             if (response.status === 201) {
                 setSuccess("Course created successfully!");
                 setTimeout(() => router.push("/courses"), 2000);
@@ -94,7 +94,7 @@ export default function CreateCourse() {
             }
         } catch (err) {
             console.error("Error creating course:", err);
-        
+
             if (err.response) {
                 // ✅ Handle Specific Response Errors
                 if (err.response.status === 400) {
@@ -116,7 +116,7 @@ export default function CreateCourse() {
             }
         } finally {
             setLoading(false);
-        }        
+        }
     };
 
     return (
@@ -162,14 +162,6 @@ export default function CreateCourse() {
                             <textarea name="short_description" className="form-control" required onChange={handleChange} />
                         </div>
 
-                        {/* Enable/Disable Course */}
-                        <div className="col-md-6">
-                            <label className="form-label">Course Enabled</label>
-                            <select name="is_enabled" className="form-control" onChange={handleChange}>
-                                <option value="true">Yes</option>
-                                <option value="false">No</option>
-                            </select>
-                        </div>
 
                         {/* Enrollment Start Date */}
                         <div className="col-md-6">
@@ -215,6 +207,14 @@ export default function CreateCourse() {
                         <div className="col-md-6">
                             <label className="form-label">Class Time</label>
                             <input type="time" name="class_time" className="form-control" required onChange={handleChange} />
+                        </div>
+                        {/* Enable/Disable Course */}
+                        <div className="col-md-6">
+                            <label className="form-label">Course Enabled</label>
+                            <select name="is_enabled" className="form-control" onChange={handleChange}>
+                                <option value="true">Yes</option>
+                                <option value="false">No</option>
+                            </select>
                         </div>
 
                         {/* Course Image URL */}

@@ -10,7 +10,7 @@ export default function ModuleList() {
 
     // ✅ Fetch Module List
     useEffect(() => {
-        axios.get(process.env.NEXT_PUBLIC_API_URL+"/modules/list")
+        axios.get(process.env.NEXT_PUBLIC_API_URL + "/modules/list")
             .then((res) => {
                 setModules(res.data.modules);
                 setLoading(false);
@@ -57,12 +57,31 @@ export default function ModuleList() {
                                         <td>{module.packageId}</td>
                                         <td>
                                             <ul>
-                                                {JSON.parse(module.module).map((m, index) => (
-                                                    <li key={index}>
-                                                        <strong>{m.title}</strong>: {m.description}
-                                                    </li>
-                                                ))}
+                                                {(() => {
+                                                    try {
+                                                        const parsedModules = typeof module.module === "string" ? JSON.parse(module.module) : module.module;
+                                                        if (!Array.isArray(parsedModules)) return <li className="text-danger">Invalid module format</li>;
+
+                                                        return parsedModules.map((m, index) => (
+                                                            <li key={index}>
+                                                                <strong>{m.title}</strong>: {m.description}
+                                                            </li>
+                                                        ));
+                                                    } catch (error) {
+                                                        console.error("Error parsing module JSON:", error);
+                                                        return <li className="text-danger">Error parsing module data</li>;
+                                                    }
+                                                })()}
                                             </ul>
+                                        </td>
+
+                                        <td>
+                                            <button
+                                                className="btn btn-warning btn-sm"
+                                                onClick={() => router.push(`/modules/edit/${module.courseId}`)}
+                                            >
+                                                Edit
+                                            </button>
                                         </td>
                                     </tr>
                                 ))

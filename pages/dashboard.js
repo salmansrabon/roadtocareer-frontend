@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import axios from "axios";
 
 export default function Dashboard() {
@@ -11,6 +12,7 @@ export default function Dashboard() {
     const [unpaidStudents, setUnpaidStudents] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const router = useRouter(); // ✅ Initialize Router
 
     useEffect(() => {
         fetchCourses();
@@ -78,6 +80,8 @@ export default function Dashboard() {
         } catch (err) {
             console.error("Error fetching dashboard data:", err);
             setError("Failed to load dashboard data.");
+            localStorage.removeItem("token");
+            router.push("/login"); // ✅ Redirect to login
         }
 
         setLoading(false);

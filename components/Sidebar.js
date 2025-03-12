@@ -9,7 +9,7 @@ const Sidebar = ({ role, isOpen, toggleSidebar }) => {
     const menuItems = role === "admin" 
         ? [
             { name: "Dashboard", path: "/dashboard" },
-            { name: "Create Course", path: "/courses" },
+            { name: "Create Course", path: "/course/list" },
             { name: "Create Package", path: "/create-package" },
             { name: "Create Modules", path: "/modules" },
             { name: "Student List", path: "/student-list" },

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import axios from "axios";
 import Link from "next/link";
 
@@ -12,6 +13,7 @@ export default function PaymentList() {
     const [totalPages, setTotalPages] = useState(1);
     const [currentPage, setCurrentPage] = useState(1);
     const limit = 10; // ✅ Set limit per page
+    const router = useRouter(); // ✅ Initialize Router
 
     const [filters, setFilters] = useState({
         studentId: "",
@@ -53,8 +55,12 @@ export default function PaymentList() {
                 // ✅ Handle Unauthorized (401) or Forbidden (403) Responses
                 if (err.response.status === 401) {
                     setError("Unauthorized Access: " + err.response.data.message);
+                    localStorage.removeItem("token");
+                    router.push("/login"); // ✅ Redirect to login
                 } else if (err.response.status === 403) {
                     setError(err.response.data.message);
+                    localStorage.removeItem("token");
+                    router.push("/login"); // ✅ Redirect to login
                 } else {
                     setError("Failed to fetch payments: " + err.response.data.message);
                 }
