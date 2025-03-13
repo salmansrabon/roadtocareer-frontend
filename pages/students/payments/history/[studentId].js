@@ -10,9 +10,8 @@ export default function PaymentHistory() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [courseFee, setCourseFee] = useState(0);
-    const [remainingBalance, setRemainingBalance] = useState(0); // ✅ Track Remaining Balance
+    const [remainingBalance, setRemainingBalance] = useState(0);
 
-    // ✅ Store student details from payment history API
     const [studentData, setStudentData] = useState({
         courseId: "",
         packageId: "",
@@ -22,74 +21,66 @@ export default function PaymentHistory() {
         installmentNumber: "",
         installmentAmount: "",
         paidAmount: "",
-        month: ""
+        month: "",
+        remarks: "",
     });
 
-    // ✅ Fetch Payment History & Student Data
     useEffect(() => {
         if (!studentId) return;
-    
+
         const token = localStorage.getItem("token");
         setLoading(true);
         setError("");
-    
+
         axios.get(`${process.env.NEXT_PUBLIC_API_URL}/payments/history/${studentId}`, {
             headers: {
-                Authorization: `Bearer ${token}`, // ✅ Attach Token in Header
+                Authorization: `Bearer ${token}`,
             }
         })
-        .then((res) => {
-            const { studentId, student_name, courseId, packageId, courseFee, payments } = res.data;
-    
-            setPaymentHistory(payments);
-            setCourseFee(courseFee);
-    
-            // ✅ Calculate remaining balance (latest payment entry)
-            if (payments.length > 0) {
-                setRemainingBalance(payments[payments.length - 1].remainingBalance);
-            } else {
-                setRemainingBalance(courseFee);
-            }
-    
-            // ✅ Update studentData from the API response
-            setStudentData((prev) => ({
-                ...prev,
-                studentId,
-                studentName: student_name,
-                courseId,
-                packageId
-            }));
-        })
-        .catch((err) => {
-            console.error("Error fetching payment history:", err);
-    
-            if (err.response) {
-                // ✅ Handle Unauthorized (401) or Forbidden (403) Responses
-                if (err.response.status === 401) {
-                    setError("Unauthorized Access: " + err.response.data.message);
-                } else if (err.response.status === 403) {
-                    setError("Forbidden: " + err.response.data.message);
-                } else {
-                    setError("Failed to fetch payment history: " + err.response.data.message);
-                }
-            } else {
-                // ✅ Handle Network Errors or Unexpected Issues
-                setError("Failed to fetch payment history. Please check your connection.");
-            }
-        })
-        .finally(() => {
-            setLoading(false);
-        });
-    
-    }, [studentId]);
-    
+            .then((res) => {
+                const { studentId, student_name, courseId, packageId, courseFee, payments } = res.data;
 
-    // ✅ Handle Input Change
+                setPaymentHistory(payments);
+                setCourseFee(courseFee);
+
+                if (payments.length > 0) {
+                    setRemainingBalance(payments[payments.length - 1].remainingBalance);
+                } else {
+                    setRemainingBalance(courseFee);
+                }
+
+                setStudentData((prev) => ({
+                    ...prev,
+                    studentId,
+                    studentName: student_name,
+                    courseId,
+                    packageId
+                }));
+            })
+            .catch((err) => {
+                console.error("Error fetching payment history:", err);
+                if (err.response) {
+                    if (err.response.status === 401) {
+                        setError("Unauthorized Access: " + err.response.data.message);
+                    } else if (err.response.status === 403) {
+                        setError("Forbidden: " + err.response.data.message);
+                    } else {
+                        setError("Failed to fetch payment history: " + err.response.data.message);
+                    }
+                } else {
+                    setError("Failed to fetch payment history. Please check your connection.");
+                }
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+
+    }, [studentId]);
+
     const handleChange = (e) => {
         setStudentData({ ...studentData, [e.target.name]: e.target.value });
     };
 
-    // ✅ Handle Add Payment
     const handleAddPayment = async () => {
         if (!studentData.installmentNumber || !studentData.paidAmount || !studentData.month) {
             alert("Please fill all required fields.");
@@ -100,22 +91,20 @@ export default function PaymentHistory() {
             const token = localStorage.getItem("token");
             await axios.post(process.env.NEXT_PUBLIC_API_URL + "/payments/add", studentData, {
                 headers: {
-                    Authorization: `Bearer ${token}`, // ✅ Attach Token in Header
+                    Authorization: `Bearer ${token}`,
                 }
             });
             alert("Payment added successfully!");
 
-            // ✅ Refresh Payment History after adding payment
-            axios.get(`${process.env.NEXT_PUBLIC_API_URL}/payments/history/${studentId}`,{
+            axios.get(`${process.env.NEXT_PUBLIC_API_URL}/payments/history/${studentId}`, {
                 headers: {
-                    Authorization: `Bearer ${token}`, // ✅ Attach Token in Header
+                    Authorization: `Bearer ${token}`,
                 }
             })
                 .then((res) => {
                     setPaymentHistory(res.data.payments);
                     setCourseFee(res.data.courseFee);
 
-                    // ✅ Update remaining balance (latest payment entry)
                     if (res.data.payments.length > 0) {
                         setRemainingBalance(res.data.payments[res.data.payments.length - 1].remainingBalance);
                     } else {
@@ -130,7 +119,8 @@ export default function PaymentHistory() {
                 installmentNumber: "",
                 installmentAmount: "",
                 paidAmount: "",
-                month: ""
+                month: "",
+                remarks: "",
             }));
         } catch (err) {
             console.error("Error adding payment:", err);
@@ -146,9 +136,8 @@ export default function PaymentHistory() {
                 {loading ? <p>Loading payments...</p> : error ? <p className="text-danger">{error}</p> : (
                     <>
                         <h4 className="fw-bold text-dark">Total Course Fee: {courseFee} TK</h4>
-                        <h5 className="fw-bold text-danger">Remaining Due: {remainingBalance} TK</h5> {/* ✅ Display Remaining Balance */}
+                        <h5 className="fw-bold text-danger">Remaining Due: {remainingBalance} TK</h5>
 
-                        {/* ✅ Add New Payment Form */}
                         <div className="card p-3 mb-4">
                             <h5 className="fw-bold">Add Payment</h5>
                             <div className="row">
@@ -189,13 +178,16 @@ export default function PaymentHistory() {
                                         ))}
                                     </select>
                                 </div>
+                                <div className="col-md-6">
+                                    <label>Remarks</label>
+                                    <textarea name="remarks" className="form-control" value={studentData.remarks} onChange={handleChange} />
+                                </div>
                                 <div className="col-md-6 mt-3">
                                     <button className="btn btn-success w-100" onClick={handleAddPayment}>Add Payment</button>
                                 </div>
                             </div>
                         </div>
 
-                        {/* ✅ Payment History Table */}
                         <table className="table table-bordered table-hover">
                             <thead className="table-dark">
                                 <tr>
@@ -203,6 +195,7 @@ export default function PaymentHistory() {
                                     <th>Paid Amount</th>
                                     <th>Remaining Due</th>
                                     <th>Month</th>
+                                    <th>Remarks</th>
                                     <th>Payment Date</th>
                                 </tr>
                             </thead>
@@ -214,14 +207,22 @@ export default function PaymentHistory() {
                                             <td>{payment.paidAmount} TK</td>
                                             <td>{payment.remainingBalance} TK</td>
                                             <td>{payment.month}</td>
-                                            <td>{new Date(payment.paymentDateTime).toLocaleString()}</td>
+                                            <td>{payment.remarks}</td>
+                                            <td>
+                                                {new Intl.DateTimeFormat("en-GB", {
+                                                    day: "2-digit",
+                                                    month: "2-digit",
+                                                    year: "numeric",
+                                                    hour: "2-digit",
+                                                    minute: "2-digit",
+                                                    hour12: true,
+                                                }).format(new Date(payment.paymentDateTime))}
+                                            </td>
                                         </tr>
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan="5" className="text-center text-muted">
-                                            No payments found.
-                                        </td>
+                                        <td colSpan="6" className="text-center text-muted">No payments found.</td>
                                     </tr>
                                 )}
                             </tbody>
