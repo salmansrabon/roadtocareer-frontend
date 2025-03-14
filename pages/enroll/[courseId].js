@@ -110,27 +110,32 @@ export default function EnrollStudent() {
         try {
             await axios.post(process.env.NEXT_PUBLIC_API_URL + "/students/signup", {
                 ...formData,
-                courseId // ✅ Attach courseId from URL
+                courseId
             });
-        
+
             setSuccess("Registration successful! Check your email for the confirmation.");
             // setTimeout(() => router.push("/login"), 3000);
         } catch (err) {
             console.error("Error registering student:", err);
-        
+
             // ✅ Ensure API Error Message is extracted correctly
             const apiErrorMessage =
                 err.response && err.response.data && err.response.data.message
                     ? err.response.data.message
                     : "An error occurred. Please contact admin\nWhatsApp: 01782808778";
-        
+
             setError(apiErrorMessage);
         } finally {
             setLoading(false);
         }
-        
-
     };
+    if (!courseDetails) {
+        return (
+            <div className="d-flex justify-content-center align-items-center bg-light" style={{ minHeight: "100vh" }}>
+                <h2 className="text-danger">Course is Not Found</h2>
+            </div>
+        );
+    }
 
     return (
         <div
@@ -177,8 +182,21 @@ export default function EnrollStudent() {
                         {/* ✅ Email */}
                         <div className="col-md-6">
                             <label className="form-label fw-bold">Email</label>
-                            <input type="email" className="form-control border-primary p-3" name="email" required onChange={handleChange} />
+                            <input
+                                type="email"
+                                className="form-control border-primary p-3"
+                                name="email"
+                                required
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    if (value === "" || value.endsWith("@gmail.com")) {
+                                        handleChange(e); // ✅ Update state only if it's a Gmail address
+                                    }
+                                }}
+                                placeholder="Enter your Gmail address"
+                            />
                         </div>
+
 
                         {/* ✅ Mobile */}
                         <div className="col-md-6">

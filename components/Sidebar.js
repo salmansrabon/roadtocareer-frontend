@@ -15,7 +15,7 @@ const Sidebar = ({ role, isOpen, toggleSidebar }) => {
             { name: "Student List", path: "/student-list" },
             { name: "Payment List", path: "/payments" },
             { name: "Student Review", path: "/reviews/add" },
-            { name: "Attendance", path: "/attendance" },
+            { name: "Attendance", path: "/attendanceList" },
             { name: "Certificate", path: "/certificate" }
         ]
         : role === "student"
