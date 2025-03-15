@@ -22,7 +22,8 @@ const Sidebar = ({ role, isOpen, toggleSidebar }) => {
         ? [
             { name: "My Dashboard", path: "/mydashboard" },
             { name: "Attendance", path: "/attendance" },
-            { name: "Certificate", path: "/certificate" }
+            { name: "Certificate", path: "/certificate" },
+            { name: "Quiz", path: "/quiz/QuizConfig" }
         ]
         : [];
 
