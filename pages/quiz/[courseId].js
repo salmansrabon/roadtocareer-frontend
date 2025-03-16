@@ -9,9 +9,10 @@ export default function QuizPage() {
     const [totalQuestions, setTotalQuestions] = useState(0);
     const [currentQuestion, setCurrentQuestion] = useState(1);
     const [mcqData, setMcqData] = useState(null);
-    const [answers, setAnswers] = useState([]);
+    const [answers, setAnswers] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [timeLeft, setTimeLeft] = useState(null); // Timer state
 
     useEffect(() => {
         // ✅ Fetch Student ID from Local Storage
@@ -48,6 +49,19 @@ export default function QuizPage() {
     useEffect(() => {
         if (!courseId) return;
 
+        // ✅ Fetch Quiz Config (for total time)
+        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/mcq-config/${courseId}`)
+            .then(res => {
+                if (res.data.mcqConfigs.length > 0) {
+                    const totalTime = res.data.mcqConfigs[0].totalTime; // Time in minutes
+                    setTimeLeft(totalTime * 60); // Convert to seconds
+                }
+            })
+            .catch(err => {
+                console.error("Error fetching quiz config:", err);
+                setError("Failed to load quiz configuration.");
+            });
+
         // ✅ Fetch Total Questions
         axios.get(`${process.env.NEXT_PUBLIC_API_URL}/mcq/fetch/${courseId}`)
             .then(res => {
@@ -74,16 +88,36 @@ export default function QuizPage() {
             .finally(() => setLoading(false));
     }, [courseId, currentQuestion]);
 
+    // ✅ Timer Logic
+    useEffect(() => {
+        if (timeLeft === null || timeLeft <= 0) return;
+
+        const timer = setInterval(() => {
+            setTimeLeft(prev => prev - 1);
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, [timeLeft]);
+
+    useEffect(() => {
+        if (timeLeft === 0) {
+            handleSubmit(true); // ✅ Auto-submit when timer expires
+        }
+    }, [timeLeft]);
+
+    // ✅ Format Time for Display (MM:SS)
+    const formatTime = (seconds) => {
+        const minutes = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${minutes}:${secs < 10 ? "0" : ""}${secs}`;
+    };
+
     // ✅ Handle Answer Selection
     const handleAnswerSelect = (selectedAnswer) => {
-        setAnswers(prev => {
-            const existingIndex = prev.findIndex(ans => ans.mcq_id === mcqData.mcq_id);
-            if (existingIndex !== -1) {
-                prev[existingIndex].user_answer = selectedAnswer; // ✅ Update existing answer
-                return [...prev];
-            }
-            return [...prev, { mcq_id: mcqData.mcq_id, user_answer: selectedAnswer }]; // ✅ Store new answer
-        });
+        setAnswers(prev => ({
+            ...prev,
+            [mcqData.mcq_id]: selectedAnswer
+        }));
     };
 
     // ✅ Navigate to Next Question
@@ -101,20 +135,27 @@ export default function QuizPage() {
     };
 
     // ✅ Submit All Answers
-    const handleSubmit = async () => {
-        if (!studentId || !courseId || answers.length === 0) {
+    const handleSubmit = async (isAutoSubmit = false) => {
+        if (!studentId || !courseId || Object.keys(answers).length === 0) {
             setError("No answers to submit.");
             return;
         }
 
         try {
-            for (const answer of answers) {
+            for (const mcq_id in answers) {
                 await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/mcq/validate`, {
                     CourseId: courseId,
                     StudentId: studentId,
-                    mcq_id: answer.mcq_id,
-                    user_answer: answer.user_answer
+                    mcq_id: mcq_id,
+                    user_answer: answers[mcq_id]
                 });
+            }
+
+            // ✅ Show different messages based on submission type
+            if (isAutoSubmit) {
+                alert("Auto submission has been processed."); // ✅ Corrected auto-submit message
+            } else {
+                alert("Thanks for your submission!"); // ✅ Manual submit message
             }
 
             router.push("/quiz/result"); // ✅ Redirect to result page
@@ -134,6 +175,11 @@ export default function QuizPage() {
                 <p className="text-danger text-center">{error}</p>
             ) : mcqData ? (
                 <div className="card p-4 shadow-lg">
+                    {/* ✅ Display Countdown Timer */}
+                    <div className="text-end">
+                        <h5 className="text-danger fw-bold">Time Left: {formatTime(timeLeft)}</h5>
+                    </div>
+
                     <h4 className="fw-bold">Question {mcqData.ques} of {totalQuestions}</h4>
                     <p className="fs-5">{mcqData.mcq_question.question_title}</p>
 
@@ -147,7 +193,7 @@ export default function QuizPage() {
                                     id={optionKey}
                                     name="answer"
                                     value={mcqData.mcq_question[optionKey]}
-                                    checked={answers.some(ans => ans.mcq_id === mcqData.mcq_id && ans.user_answer === mcqData.mcq_question[optionKey])}
+                                    checked={answers[mcqData.mcq_id] === mcqData.mcq_question[optionKey]}
                                     onChange={() => handleAnswerSelect(mcqData.mcq_question[optionKey])}
                                 />
                                 <label className="form-check-label" htmlFor={optionKey}>
@@ -159,27 +205,16 @@ export default function QuizPage() {
 
                     {/* ✅ Navigation Buttons */}
                     <div className="d-flex justify-content-between">
-                        <button
-                            className="btn btn-secondary"
-                            onClick={handlePrevious}
-                            disabled={currentQuestion === 1}
-                        >
+                        <button className="btn btn-secondary" onClick={handlePrevious} disabled={currentQuestion === 1}>
                             Previous
                         </button>
-                        
+
                         {currentQuestion === totalQuestions ? (
-                            <button
-                                className="btn btn-success"
-                                onClick={handleSubmit}
-                            >
+                            <button className="btn btn-success" onClick={() => handleSubmit(false)}>
                                 Submit Quiz
                             </button>
                         ) : (
-                            <button
-                                className="btn btn-primary"
-                                onClick={handleNext}
-                                disabled={!answers.some(ans => ans.mcq_id === mcqData.mcq_id)}
-                            >
+                            <button className="btn btn-primary" onClick={handleNext} disabled={!answers[mcqData.mcq_id]}>
                                 Next
                             </button>
                         )}

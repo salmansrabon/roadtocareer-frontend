@@ -122,7 +122,7 @@ export default function QuizConfig() {
                     <h3 className="fw-bold">{quizConfig.quiz_title}</h3>
                     <p><strong>Description:</strong> {quizConfig.quiz_description}</p>
                     <p><strong>Total Questions:</strong> {quizConfig.totalQuestion}</p>
-                    <p><strong>Total Time:</strong> {quizConfig.totalTime}</p>
+                    <p><strong>Total Time:</strong> {quizConfig.totalTime} min</p>
                     <p>
                         <strong>Start Time:</strong>{" "}
                         {quizConfig.start_datetime
