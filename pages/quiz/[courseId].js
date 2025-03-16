@@ -104,6 +104,30 @@ export default function QuizPage() {
             handleSubmit(true); // ✅ Auto-submit when timer expires
         }
     }, [timeLeft]);
+    useEffect(() => {
+        const handleBeforeUnload = (event) => {
+            event.preventDefault();
+            event.returnValue = "Warning: Refreshing the page will auto-submit your quiz!";
+        };
+    
+        window.addEventListener("beforeunload", handleBeforeUnload);
+    
+        return () => {
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+        };
+    }, []);
+    useEffect(() => {
+        const handleUnload = async () => {
+            await handleSubmit(true); // ✅ Auto-submit when page refreshes
+        };
+    
+        window.addEventListener("unload", handleUnload);
+    
+        return () => {
+            window.removeEventListener("unload", handleUnload);
+        };
+    }, []);
+        
 
     // ✅ Format Time for Display (MM:SS)
     const formatTime = (seconds) => {
@@ -136,11 +160,11 @@ export default function QuizPage() {
 
     // ✅ Submit All Answers
     const handleSubmit = async (isAutoSubmit = false) => {
-        if (!studentId || !courseId || Object.keys(answers).length === 0) {
+        if (!studentId || !courseId || answers.length === 0) {
             setError("No answers to submit.");
             return;
         }
-
+    
         try {
             for (const mcq_id in answers) {
                 await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/mcq/validate`, {
@@ -150,20 +174,16 @@ export default function QuizPage() {
                     user_answer: answers[mcq_id]
                 });
             }
-
-            // ✅ Show different messages based on submission type
-            if (isAutoSubmit) {
-                alert("Auto submission has been processed."); // ✅ Corrected auto-submit message
-            } else {
-                alert("Thanks for your submission!"); // ✅ Manual submit message
-            }
-
-            router.push("/quiz/result"); // ✅ Redirect to result page
+    
+            alert(isAutoSubmit ? "Auto submission has been processed." : "Thanks for your submission!");
+    
+            router.push("/quiz/result");
         } catch (err) {
             console.error("Error submitting answers:", err);
             setError("Failed to submit answers.");
         }
     };
+    
 
     return (
         <div className="container mt-5">
