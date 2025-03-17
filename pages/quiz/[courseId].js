@@ -7,6 +7,7 @@ export default function QuizPage() {
     const [studentId, setStudentId] = useState(null);
     const [courseId, setCourseId] = useState(null);
     const [totalQuestions, setTotalQuestions] = useState(0);
+    const [totalQuestionsByConfig, setTotalQuestionsByConfig] = useState(0);
     const [currentQuestion, setCurrentQuestion] = useState(1);
     const [mcqData, setMcqData] = useState(null);
     const [answers, setAnswers] = useState({});
@@ -55,6 +56,9 @@ export default function QuizPage() {
                 if (res.data.mcqConfigs.length > 0) {
                     const totalTime = res.data.mcqConfigs[0].totalTime; // Time in minutes
                     setTimeLeft(totalTime * 60); // Convert to seconds
+
+                    const configTotalQuestions = res.data.mcqConfigs[0].totalQuestion;
+                    setTotalQuestionsByConfig(configTotalQuestions);
                 }
             })
             .catch(err => {
@@ -71,6 +75,10 @@ export default function QuizPage() {
                 console.error("Error fetching total questions:", err);
                 setError("Failed to load total questions.");
             });
+
+            if(totalQuestionsByConfig < totalQuestions){
+                setTotalQuestions(totalQuestionsByConfig);
+            }
     }, [courseId]);
 
     useEffect(() => {
@@ -109,9 +117,9 @@ export default function QuizPage() {
             event.preventDefault();
             event.returnValue = "Warning: Refreshing the page will auto-submit your quiz!";
         };
-    
+
         window.addEventListener("beforeunload", handleBeforeUnload);
-    
+
         return () => {
             window.removeEventListener("beforeunload", handleBeforeUnload);
         };
@@ -120,14 +128,14 @@ export default function QuizPage() {
         const handleUnload = async () => {
             await handleSubmit(true); // ✅ Auto-submit when page refreshes
         };
-    
+
         window.addEventListener("unload", handleUnload);
-    
+
         return () => {
             window.removeEventListener("unload", handleUnload);
         };
     }, []);
-        
+
 
     // ✅ Format Time for Display (MM:SS)
     const formatTime = (seconds) => {
@@ -164,7 +172,7 @@ export default function QuizPage() {
             setError("No answers to submit.");
             return;
         }
-    
+
         try {
             for (const mcq_id in answers) {
                 await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/mcq/validate`, {
@@ -174,16 +182,16 @@ export default function QuizPage() {
                     user_answer: answers[mcq_id]
                 });
             }
-    
+
             alert(isAutoSubmit ? "Auto submission has been processed." : "Thanks for your submission!");
-    
+
             router.push("/quiz/result");
         } catch (err) {
             console.error("Error submitting answers:", err);
             setError("Failed to submit answers.");
         }
     };
-    
+
 
     return (
         <div className="container mt-5">
@@ -200,7 +208,7 @@ export default function QuizPage() {
                         <h5 className="text-danger fw-bold">Time Left: {formatTime(timeLeft)}</h5>
                     </div>
 
-                    <h4 className="fw-bold">Question {mcqData.ques} of {totalQuestions}</h4>
+                    <h4 className="fw-bold">Question {mcqData.ques} of {totalQuestionsByConfig}</h4>
                     <p className="fs-5">{mcqData.mcq_question.question_title}</p>
 
                     {/* ✅ Options */}
@@ -229,7 +237,7 @@ export default function QuizPage() {
                             Previous
                         </button>
 
-                        {currentQuestion === totalQuestions ? (
+                        {currentQuestion === totalQuestionsByConfig ? (
                             <button className="btn btn-success" onClick={() => handleSubmit(false)}>
                                 Submit Quiz
                             </button>
