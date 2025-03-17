@@ -60,7 +60,7 @@ export default function PaymentDetails() {
     const fetchPaymentDetails = async (studentId) => {
         try {
             const token = localStorage.getItem("token"); // ✅ Retrieve Token from Local Storage
-
+    
             const response = await axios.post(
                 `${process.env.NEXT_PUBLIC_API_URL}/payments/details`,
                 { username: studentId },
@@ -68,23 +68,44 @@ export default function PaymentDetails() {
                     headers: {
                         Authorization: `Bearer ${token}`, // ✅ Attach Token in Header
                     },
+                    validateStatus: (status) => status < 500 // ✅ Prevents axios from throwing error for 4xx responses
                 }
             );
-
-            if (response.data.success) {
-                setPayments(response.data.installments.sort((a, b) => b.installmentNumber - a.installmentNumber)); // ✅ Sort Installments in Descending Order
-                setTotalPaid(parseFloat(response.data.totalPaid)); // ✅ Store Total Paid Amount
-                setRemainingBalance(parseFloat(response.data.remainingBalance)); // ✅ Store Remaining Balance
-            } else {
-                setError("No payments found.");
+    
+            // ✅ Check if success is false but not an error
+            if (!response.data.success) {
+                setError(response.data.message || "No payments found.");
+                setPayments([]); // ✅ Clear any previous payment data
+                setTotalPaid(0);
+                setRemainingBalance(0);
+                return;
             }
+    
+            // ✅ If payments exist, store data
+            setPayments(response.data.installments.sort((a, b) => b.installmentNumber - a.installmentNumber));
+            setTotalPaid(parseFloat(response.data.totalPaid));
+            setRemainingBalance(parseFloat(response.data.remainingBalance));
+            setError(""); // ✅ Clear any previous errors
+    
         } catch (err) {
-            console.error("Error fetching payment details:", err);
-            setError("Failed to load payment details.");
+            if (err.response) {
+                if (err.response.status === 400) {
+                    setError(err.response.data.message || "Invalid request. Please check student ID.");
+                } else if (err.response.status === 401) {
+                    setError("Unauthorized access. Redirecting to login...");
+                    setTimeout(() => router.push("/login"), 2000); // ✅ Redirect to Login
+                } else {
+                    setError("Something went wrong. Please try again.");
+                }
+            } else {
+                setError("Network error. Please check your connection.");
+            }
         } finally {
             setLoading(false);
         }
     };
+    
+    
 
     return (
         <div className="container mt-5">
