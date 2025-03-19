@@ -11,7 +11,7 @@ export default function McqStudentsResult() {
 
     useEffect(() => {
         if (!courseId) return;
-
+    
         // ✅ Fetch results for the given CourseId
         axios.get(`${process.env.NEXT_PUBLIC_API_URL}/mcq/result/list/${courseId}`)
             .then(res => {
@@ -19,10 +19,27 @@ export default function McqStudentsResult() {
             })
             .catch(err => {
                 console.error("Error fetching student results:", err);
-                setError("Failed to load student results.");
+    
+                if (err.response) {
+                    // ✅ Handle specific error status codes
+                    if (err.response.status === 404) {
+                        setError("No students found for this course.");
+                    } else if (err.response.status === 401) {
+                        setError("Unauthorized! Please log in again.");
+                    } else if (err.response.status === 403) {
+                        setError("Forbidden! You do not have permission to access this resource.");
+                    } else if (err.response.status === 500) {
+                        setError("Internal Server Error! Please try again later.");
+                    } else {
+                        setError("An unexpected error occurred.");
+                    }
+                } else {
+                    setError("Network error. Please check your internet connection.");
+                }
             })
             .finally(() => setLoading(false));
     }, [courseId]);
+    
 
     return (
         <div className="container mt-5">

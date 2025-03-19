@@ -52,7 +52,11 @@ export default function CreateMcqConfig() {
         }
 
         try {
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/mcq-config/create`, formData);
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/mcq-config/create`, formData, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                }
+            });
 
             if (response.status === 201) {
                 setSuccessMessage("MCQ Config created successfully!");
@@ -63,8 +67,16 @@ export default function CreateMcqConfig() {
                 if (err.response.status === 400) {
                     setError("Bad Request: Please check the entered values.");
                 } else if (err.response.status === 401) {
+                    setError("Unauthorized: Please Login.");
+                    setTimeout(() => router.push(`/login`), 2000);
+                }
+                else if (err.response.status === 403) {
                     setError("Unauthorized: You need permission to perform this action.");
-                } else {
+                }
+                else if (err.response.status === 409) {
+                    setError("Configuration already created for this course.");
+                }
+                else {
                     setError("Something went wrong. Please try again later.");
                 }
             } else {
@@ -76,18 +88,18 @@ export default function CreateMcqConfig() {
     return (
         <div className="container mt-5">
             <h2 className="text-primary text-center fw-bold">Create MCQ Config</h2>
-            
+
             {error && <p className="text-danger text-center">{error}</p>}
             {successMessage && <p className="text-success text-center">{successMessage}</p>}
 
             <form onSubmit={handleSubmit} className="card p-4 shadow-lg">
-            <div className="mb-3">
+                <div className="mb-3">
                     <label className="form-label">Course ID</label>
-                    <select 
-                        name="CourseId" 
-                        value={formData.CourseId} 
-                        onChange={handleChange} 
-                        className="form-control" 
+                    <select
+                        name="CourseId"
+                        value={formData.CourseId}
+                        onChange={handleChange}
+                        className="form-control"
                         required
                     >
                         <option value="">Select a Course</option>

@@ -11,7 +11,7 @@ export default function ResetPasswordConfirm() {
     const { token } = router.query; // ✅ Get token from URL
 
     useEffect(() => {
-        if (!router.isReady) return; // ✅ Ensure router is ready before accessing query params
+        if (!router.isReady) return;
         if (!token) {
             setMessage("Invalid reset link.");
         }

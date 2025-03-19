@@ -6,7 +6,6 @@ import universitiesData from "/public/data/universities.json";
 export default function EnrollStudent() {
     const router = useRouter();
     const { courseId } = router.query; // ✅ Get courseId from URL
-
     const [universities, setUniversities] = useState([]); // ✅ Store university names
     const [filteredUniversities, setFilteredUniversities] = useState([]); // ✅ Filtered universities
     const [search, setSearch] = useState(""); // ✅ Search input
@@ -91,7 +90,7 @@ export default function EnrollStudent() {
     const handleSelect = (selectedUniversity) => {
         setSearch(selectedUniversity);
         setShowDropdown(false);
-        handleChange({ target: { name: "university", value: selectedUniversity } }); // ✅ Update Parent
+        handleChange({ target: { name: "university", value: selectedUniversity } });
     };
 
     // ✅ Handle Form Submission

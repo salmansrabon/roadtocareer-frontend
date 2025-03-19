@@ -34,31 +34,68 @@ export default function AttendancePage() {
     const fetchAttendance = async (studentId) => {
         setLoading(true);
         setError("");
+        
         try {
             const token = localStorage.getItem("token");
+    
+            if (!token) {
+                setError("Unauthorized: Please log in.");
+                localStorage.removeItem("token");
+                router.push("/login");
+                return;
+            }
+    
             const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/students/attendance/${studentId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
-
+    
             setAttendanceList(response.data.attendanceList);
             setTotalClicks(response.data.totalClicks);
             setAttendancePercentage(response.data.attendancePercentage);
-
+    
             // ✅ Set last attendance time if exists
             if (response.data.attendanceList.length > 0) {
                 const lastEntry = response.data.attendanceList[response.data.attendanceList.length - 1];
                 const lastTime = new Date(lastEntry.time);
                 setLastAttendanceTime(lastTime);
             }
+    
         } catch (err) {
             console.error("Error fetching attendance:", err);
-            setError("Failed to load attendance data.");
+            
+            if (err.response) {
+                switch (err.response.status) {
+                    case 400:
+                        setError("Bad Request: Invalid input. Please check your request.");
+                        break;
+                    case 401:
+                        setError("Unauthorized: Please log in to access this data.");
+                        localStorage.removeItem("token");
+                        router.push("/login");
+                        break;
+                    case 403:
+                        setError("Forbidden: You do not have permission to view this data.");
+                        break;
+                    case 404:
+                        setError("No attendance records found for this student.");
+                        break;
+                    case 500:
+                        setError("Internal Server Error: Something went wrong on the server.");
+                        break;
+                    default:
+                        setError("An unexpected error occurred. Please try again later.");
+                }
+            } else {
+                setError("Network error. Please check your internet connection.");
+            }
+    
         } finally {
             setLoading(false);
         }
     };
+    
 
     // ✅ Handle Attendance Marking
     const markAttendance = async () => {

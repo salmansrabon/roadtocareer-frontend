@@ -14,16 +14,46 @@ export default function QuizConfigPage() {
         fetchQuizConfigs();
     }, []);
 
-    const fetchQuizConfigs = () => {
-        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/mcq-config`)
-            .then(res => {
-                setQuizConfigs(res.data.mcqConfigs);
-            })
-            .catch(err => {
-                console.error("Error fetching quiz config:", err);
-                setError("Failed to load quiz configurations.");
-            })
-            .finally(() => setLoading(false));
+    const fetchQuizConfigs = async () => {
+        try {
+            const token = localStorage.getItem("token"); 
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/mcq-config`,{
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            setQuizConfigs(response.data.mcqConfigs);
+        } catch (err) {
+            console.error("Error fetching quiz config:", err);
+
+            if (err.response) {
+                switch (err.response.status) {
+                    case 400:
+                        setError("Bad Request: Please check your input data.");
+                        break;
+                    case 401:
+                        setError("Unauthorized: Please log in to access this page.");
+                        router.push("/login"); // ✅ Redirect to login page
+                        break;
+                    case 403:
+                        setError("Forbidden: You do not have permission to access this resource.");
+                        
+                        break;
+                    case 404:
+                        setError("No quiz configurations found.");
+                        break;
+                    case 500:
+                        setError("Internal Server Error: Something went wrong on the server.");
+                        break;
+                    default:
+                        setError("An unexpected error occurred. Please try again.");
+                }
+            } else {
+                setError("Network error: Please check your connection.");
+            }
+        } finally {
+            setLoading(false);
+        }
     };
 
     // ✅ Format Date for Readability
@@ -83,19 +113,19 @@ export default function QuizConfigPage() {
     };
     const formatDateTimeLocal = (dateString) => {
         if (!dateString) return "";
-    
+
         const date = new Date(dateString);
-        
+
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, "0"); // Ensure 2 digits
         const day = String(date.getDate()).padStart(2, "0");
         const hours = String(date.getHours()).padStart(2, "0"); // 24-hour format
         const minutes = String(date.getMinutes()).padStart(2, "0");
         const seconds = String(date.getSeconds()).padStart(2, "0"); // Include seconds
-    
+
         return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
     };
-    
+
 
 
     return (
@@ -128,7 +158,7 @@ export default function QuizConfigPage() {
                                 <th>Start Time</th>
                                 <th>End Time</th>
                                 <th>Status</th>
-                                <th>Action</th>
+                                <th className="text-center">Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -154,14 +184,30 @@ export default function QuizConfigPage() {
                                         <td className={config.isActive ? "text-success fw-bold" : "text-danger fw-bold"}>
                                             {config.isActive ? "Active" : "Inactive"}
                                         </td>
-                                        <td>
+                                        <td className="d-flex gap-2">
                                             <button
-                                                className="btn btn-primary btn-sm"
+                                                className="btn btn-warning btn-sm mx-1"
                                                 onClick={() => handleViewConfig(config)}
                                             >
-                                                View
+                                                Edit Config
+                                            </button>
+
+                                            <button
+                                                className="btn btn-info btn-sm mx-1"
+                                                onClick={() => router.push(`/quiz/mcqList/${config.CourseId}`)}
+                                            >
+                                                <i className="fas fa-eye"></i> View Quiz
+                                            </button>
+
+                                            <button
+                                                className="btn btn-success btn-sm mx-1"
+                                                onClick={() => router.push(`/quiz/createMCQ/${config.CourseId}`)}
+                                            >
+                                                <i className="fas fa-eye"></i> Create Quiz
                                             </button>
                                         </td>
+
+
                                     </tr>
                                 ))
                             ) : (
