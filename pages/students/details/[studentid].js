@@ -13,7 +13,8 @@ export default function StudentDetails() {
     const [formData, setFormData] = useState({});
     const [originalData, setOriginalData] = useState({});
     const [updating, setUpdating] = useState(false);
-    const [updateMessage, setUpdateMessage] = useState(""); // ✅ New State for API Response Message
+    const [updateMessage, setUpdateMessage] = useState("");
+    const [imageFile, setImageFile] = useState(null);
 
     useEffect(() => {
         if (!router.isReady || !studentid) return;
@@ -43,44 +44,91 @@ export default function StudentDetails() {
         }));
     };
 
+
+    const handleFileChange = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            setImageFile(file); // ✅ Store the selected file
+            setFormData((prev) => ({
+                ...prev,
+                certificate: URL.createObjectURL(file), // ✅ Temporary preview URL
+            }));
+        }
+    };
+
+
+
     // ✅ Handle Update Student
     const handleUpdate = async () => {
         setUpdating(true);
         setUpdateMessage(""); // ✅ Clear previous messages
 
         try {
+            let imageUrl = formData.certificate; // Keep existing certificate
+
+            // ✅ If a new image is selected, upload it
+            if (imageFile) {
+                const uploadFormData = new FormData();
+                uploadFormData.append("image", imageFile);
+
+                const uploadResponse = await axios.post(
+                    `${process.env.NEXT_PUBLIC_API_URL}/images/upload`,
+                    uploadFormData,
+                    { headers: { "Content-Type": "multipart/form-data" } }
+                );
+
+                imageUrl = `${process.env.NEXT_PUBLIC_API_URL}` + uploadResponse.data.imageUrl; // Get uploaded image URL
+            }
+
+            // ✅ Update student details including certificate URL
             const updatedData = {
                 ...formData,
+                certificate: imageUrl, // Store updated certificate URL
                 isEnrolled: formData.isEnrolled ? 1 : 0,
             };
 
-            await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/students/${studentid}`, updatedData);
+            console.log("Final formData before update:", updatedData);
 
+            await axios.put(
+                `${process.env.NEXT_PUBLIC_API_URL}/students/${studentid}`,
+                updatedData
+            );
+
+            // ✅ Update User table if `isValid` field has changed
             if (formData.User?.isValid !== originalData.User?.isValid) {
-                const userResponse = await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/users/${studentid}`, {
-                    isValid: formData.User?.isValid
-                });
+                const userResponse = await axios.patch(
+                    `${process.env.NEXT_PUBLIC_API_URL}/users/${studentid}`,
+                    { isValid: formData.User?.isValid }
+                );
 
                 if (userResponse.data.message) {
                     setUpdateMessage(userResponse.data.message); // ✅ Store API Response Message
                 }
             }
 
+            // ✅ Update the UI with new data
             setStudent((prev) => ({
                 ...prev,
+                certificate: imageUrl, // ✅ Update UI with new image
                 isEnrolled: !!updatedData.isEnrolled,
                 User: { ...prev.User, isValid: formData.User?.isValid }
             }));
 
             setOriginalData(updatedData);
             setIsEditing(false);
-            fetchStudentData();
+            fetchStudentData(); // ✅ Refresh data after update
+
         } catch (err) {
+            console.error("Update Error:", err);
             setError("Failed to update student details.");
         }
 
         setUpdating(false);
     };
+
+
+
+
 
     const handleCancel = () => {
         setFormData(originalData);
@@ -237,6 +285,38 @@ export default function StudentDetails() {
                             ) : student.remark}
                         </td>
                     </tr>
+                    <tr>
+                        <td><strong>Certificate</strong></td>
+                        <td>
+                            {isEditing ? (
+                                <div>
+                                    <input
+                                        type="file"
+                                        className="form-control"
+                                        accept="image/*"
+                                        onChange={handleFileChange}
+                                    />
+                                    {formData.certificate && (
+                                        <img
+                                            src={formData.certificate}
+                                            alt="Uploaded Certificate"
+                                            style={{ width: "100px", marginTop: "10px" }}
+                                        />
+                                    )}
+                                </div>
+                            ) : (
+                                student.certificate ? (
+                                    <img
+                                        src={formData.certificate}
+                                        alt="Certificate"
+                                        style={{ width: "100px" }}
+                                    />
+                                ) : "No certificate uploaded"
+                            )}
+                        </td>
+                    </tr>
+
+
                     <tr>
                         <td><strong>isEnrolled</strong></td>
                         <td>
