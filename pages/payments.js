@@ -37,7 +37,7 @@ export default function PaymentList() {
             const token = localStorage.getItem("token");
             const queryParams = new URLSearchParams({ ...filters, page: currentPage, limit }).toString();
 
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/payments?${queryParams}`, {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/payments/paid?${queryParams}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -75,7 +75,7 @@ export default function PaymentList() {
         try {
             const token = localStorage.getItem("token");
             const params = { ...filters, limit: 1000, offset: 0 };
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/payments`, {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/payments/paid`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },

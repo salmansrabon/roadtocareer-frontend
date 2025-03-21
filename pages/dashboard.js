@@ -48,7 +48,7 @@ export default function Dashboard() {
                 return;
             }
 
-            const paymentResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/payments?courseId=${selectedCourse}&month=${selectedMonth}`, {
+            const paymentResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/payments/paid?courseId=${selectedCourse}&month=${selectedMonth}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
