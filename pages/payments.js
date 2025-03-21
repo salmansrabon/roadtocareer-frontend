@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import axios from "axios";
 import Link from "next/link";
+import { CSVLink } from "react-csv";
 
 export default function PaymentList() {
     const [payments, setPayments] = useState([]);
+    const [exportData, setExportData] = useState([]);
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -12,8 +14,8 @@ export default function PaymentList() {
     const [totalPayments, setTotalPayments] = useState(0);
     const [totalPages, setTotalPages] = useState(1);
     const [currentPage, setCurrentPage] = useState(1);
-    const limit = 10; // ✅ Set limit per page
-    const router = useRouter(); // ✅ Initialize Router
+    const limit = 10;
+    const router = useRouter();
 
     const [filters, setFilters] = useState({
         studentId: "",
@@ -23,21 +25,21 @@ export default function PaymentList() {
 
     useEffect(() => {
         fetchPayments();
+        fetchExportData();
         fetchCourses();
-    }, [currentPage]); // ✅ Re-fetch payments when page changes
+    }, [currentPage, filters]);
 
-    // ✅ Fetch Payments from API with Pagination
     const fetchPayments = async () => {
         setLoading(true);
         setError("");
 
         try {
-            const token = localStorage.getItem("token"); // ✅ Retrieve Token from Local Storage
+            const token = localStorage.getItem("token");
             const queryParams = new URLSearchParams({ ...filters, page: currentPage, limit }).toString();
 
             const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/payments?${queryParams}`, {
                 headers: {
-                    Authorization: `Bearer ${token}`, // ✅ Attach Token in Header
+                    Authorization: `Bearer ${token}`,
                 },
             });
 
@@ -46,68 +48,94 @@ export default function PaymentList() {
                 setTotalPayments(response.data.totalPayments);
                 setTotalPaidAmount(response.data.totalPaidAmount);
                 setTotalPages(response.data.totalPages);
-                setError(""); // ✅ Clear any previous errors
+                setError("");
             }
         } catch (err) {
-            console.error("Error fetching payments:", err);
-
             if (err.response) {
-                // ✅ Handle Unauthorized (401) or Forbidden (403) Responses
                 if (err.response.status === 401) {
                     setError("Unauthorized Access: " + err.response.data.message);
                     localStorage.removeItem("token");
-                    router.push("/login"); // ✅ Redirect to login
+                    router.push("/login");
                 } else if (err.response.status === 403) {
                     setError(err.response.data.message);
                     localStorage.removeItem("token");
-                    router.push("/login"); // ✅ Redirect to login
+                    router.push("/login");
                 } else {
                     setError("Failed to fetch payments: " + err.response.data.message);
                 }
             } else {
-                // ✅ Handle Network Errors or Unexpected Issues
                 setError("Failed to fetch payments. Please check your connection.");
             }
         }
 
-
         setLoading(false);
     };
 
-    // ✅ Fetch Courses List
-    const fetchCourses = async () => {
+    const fetchExportData = async () => {
         try {
-            const response = await axios.get(process.env.NEXT_PUBLIC_API_URL + "/courses/list");
-            setCourses(response.data.courses.sort((a, b) => b.courseId.localeCompare(a.courseId)));
+            const token = localStorage.getItem("token");
+            const params = { ...filters, limit: 1000, offset: 0 };
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/payments`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                params,
+            });
+            setExportData(response.data.payments || []);
         } catch (err) {
-            console.error("Failed to fetch courses." + response.data.message);
+            console.error("Failed to fetch export data.");
         }
     };
 
-    // ✅ Handle Filter Change
+    const fetchCourses = async () => {
+        try {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/courses/list`);
+            setCourses(response.data.courses.sort((a, b) => b.courseId.localeCompare(a.courseId)));
+        } catch (err) {
+            console.error("Failed to fetch courses.");
+        }
+    };
+
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
         setFilters((prev) => ({ ...prev, [name]: value }));
     };
 
-    // ✅ Handle Page Change
     const handlePageChange = (page) => {
         if (page >= 1 && page <= totalPages) {
             setCurrentPage(page);
         }
     };
 
+    const exportHeaders = [
+        { label: "Student ID", key: "studentId" },
+        { label: "Student Name", key: "studentName" },
+        { label: "Course ID", key: "courseId" },
+        { label: "Installment Amount", key: "installmentAmount" },
+        { label: "Paid Amount", key: "paidAmount" },
+        { label: "Remaining Balance", key: "remainingBalance" },
+        { label: "Month", key: "month" },
+        { label: "Payment Date", key: "paymentDateTime" },
+    ];
+
     return (
         <div className="container mt-5">
-            <h2 className="fw-bold text-primary text-center mb-4">
-                Payment List ({totalPayments})
-            </h2>
+            <div className="d-flex justify-content-between align-items-center mb-3">
+                <h2 className="fw-bold text-primary">Payment List ({totalPayments})</h2>
+                <CSVLink
+                    data={exportData}
+                    headers={exportHeaders}
+                    filename={`payments_export_${new Date().toISOString()}.csv`}
+                    className="btn btn-success"
+                >
+                    Export to Excel
+                </CSVLink>
+            </div>
 
             <h5 className="text-center text-success mb-4">
                 Total Paid Amount: <strong>{totalPaidAmount.toFixed(2)} TK</strong>
             </h5>
 
-            {/* ✅ Filters Section */}
             <div className="row mb-3">
                 <div className="col-md-4">
                     <input
@@ -141,11 +169,9 @@ export default function PaymentList() {
 
             <button className="btn btn-primary mb-3 w-100" onClick={fetchPayments}>Apply Filters</button>
 
-            {/* ✅ Show Loading/Error */}
             {loading && <div className="text-center"><strong>Loading...</strong></div>}
             {error && <div className="alert alert-danger">{error}</div>}
 
-            {/* ✅ Payment Table */}
             <table className="table table-bordered table-striped shadow-sm">
                 <thead className="table-dark">
                     <tr>
@@ -164,7 +190,7 @@ export default function PaymentList() {
                     {payments.length > 0 ? (
                         payments.map((payment, index) => (
                             <tr key={payment.id}>
-                                <td>{index + 1}</td>
+                                <td>{(currentPage - 1) * limit + index + 1}</td>
                                 <td>
                                     <Link href={`/students/payments/history/${payment.studentId}`} passHref>
                                         {payment.studentId}
@@ -187,7 +213,6 @@ export default function PaymentList() {
                 </tbody>
             </table>
 
-            {/* ✅ Pagination Controls */}
             <div className="pagination d-flex justify-content-center mt-4">
                 <button className="btn btn-primary me-2" disabled={currentPage === 1} onClick={() => handlePageChange(currentPage - 1)}>Previous</button>
                 <span className="fw-bold mx-3">Page {currentPage} of {totalPages}</span>

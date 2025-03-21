@@ -3,9 +3,11 @@ import axios from "axios";
 import { useRouter } from "next/router";
 import { FaCcPaypal, FaEye } from "react-icons/fa";
 import Pagination from "../components/common/Pagination";
+import { CSVLink } from "react-csv";
 
 export default function StudentList() {
     const [students, setStudents] = useState([]);
+    const [exportData, setExportData] = useState([]);
     const [totalStudents, setTotalStudents] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -31,6 +33,7 @@ export default function StudentList() {
     useEffect(() => {
         fetchStudents();
         fetchCourses();
+        fetchExportData();
     }, [currentPage, filters]);
 
     // ✅ Fetch Students from API with Filters
@@ -79,6 +82,43 @@ export default function StudentList() {
 
         setLoading(false);
     };
+    const fetchExportData = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const queryParams = new URLSearchParams({
+                ...filters,
+                page: 1,
+                limit: 1000, // Fetch large amount for export
+            }).toString();
+
+            const response = await axios.get(
+                `${process.env.NEXT_PUBLIC_API_URL}/students/list?${queryParams}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    }
+                }
+            );
+
+            setExportData(response.data.students || []);
+        } catch (err) {
+            console.error("Failed to fetch export data");
+        }
+    };
+
+    const exportHeaders = [ // ✅ [NEW] CSV headers
+        { label: "Course ID", key: "Course.courseId" },
+        { label: "Batch No", key: "batch_no" },
+        { label: "Student ID", key: "StudentId" },
+        { label: "Student Name", key: "student_name" },
+        { label: "Email", key: "email" },
+        { label: "Mobile", key: "mobile" },
+        { label: "Profession", key: "profession" },
+        { label: "University", key: "university" },
+        { label: "Due", key: "due" },
+        { label: "isValid", key: "User.isValid" },
+        { label: "isEnrolled", key: "isEnrolled" }
+    ];
 
     // ✅ Fetch Course List
     const fetchCourses = async () => {
@@ -100,7 +140,17 @@ export default function StudentList() {
     return (
         <div className="container-fluid mt-4">
             <div className="card shadow-lg p-4">
-                <h2 className="text-primary fw-bold text-center">Student List ({totalStudents})</h2>
+            <div className="d-flex justify-content-between align-items-center mb-3"> {/* ✅ [NEW] Wrap heading + export */}
+                    <h2 className="text-primary fw-bold">Student List ({totalStudents})</h2>
+                    <CSVLink
+                        data={exportData}
+                        headers={exportHeaders}
+                        filename={`students_export_${new Date().toISOString()}.csv`}
+                        className="btn btn-success"
+                    >
+                        Export to Excel
+                    </CSVLink>
+                </div>
 
                 {/* ✅ Filters Section */}
                 <div className="row mb-3">

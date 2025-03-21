@@ -1,25 +1,36 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { CSVLink } from "react-csv";
 
 export default function AttendanceList() {
     const [attendanceRecords, setAttendanceRecords] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [courses, setCourses] = useState([]);
+    const [exportData, setExportData] = useState([]);
 
-    // ✅ Filter States
     const [filters, setFilters] = useState({
         courseId: "",
         batch_no: "",
         student_name: ""
     });
 
-    // ✅ Fetch Attendance Records (Triggered on Component Mount & Filter Change)
     useEffect(() => {
+        fetchCourses();
         fetchAttendanceRecords();
-    }, []); // ✅ Fetch data only on mount
+        fetchExportData();
+    }, [filters]);
 
-    // ✅ Function to Fetch Attendance Records
-    const fetchAttendanceRecords = async (appliedFilters = filters) => {
+    const fetchCourses = async () => {
+        try {
+            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/courses/list`);
+            setCourses(res.data.courses);
+        } catch (err) {
+            console.error("Failed to fetch courses", err);
+        }
+    };
+
+    const fetchAttendanceRecords = async () => {
         setLoading(true);
         setError("");
         try {
@@ -28,7 +39,7 @@ export default function AttendanceList() {
                 `${process.env.NEXT_PUBLIC_API_URL}/students/list/attendance`,
                 {
                     headers: { Authorization: `Bearer ${token}` },
-                    params: appliedFilters, // ✅ Send filters dynamically
+                    params: filters,
                 }
             );
             setAttendanceRecords(response.data.attendanceRecords);
@@ -40,60 +51,101 @@ export default function AttendanceList() {
         }
     };
 
-    // ✅ Handle Input Changes for Filters
+    const fetchExportData = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const response = await axios.get(
+                `${process.env.NEXT_PUBLIC_API_URL}/students/list/attendance`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                    params: filters,
+                }
+            );
+            setExportData(response.data.attendanceRecords || []);
+        } catch (err) {
+            console.error("Failed to fetch export data");
+        }
+    };
+
     const handleFilterChange = (e) => {
         setFilters({ ...filters, [e.target.name]: e.target.value });
     };
 
-    // ✅ Apply Filters (Trigger API Request)
-    const applyFilters = () => {
-        fetchAttendanceRecords(filters);
-    };
+    const exportHeaders = [
+        { label: "Course ID", key: "courseId" },
+        { label: "Course Title", key: "courseTitle" },
+        { label: "Batch No", key: "batch_no" },
+        { label: "Student ID", key: "StudentId" },
+        { label: "Student Name", key: "student_name" },
+        { label: "Classes Attended", key: "totalClicks" },
+        { label: "Attendance %", key: "attendancePercentage" }
+    ];
 
     return (
         <div className="container mt-4">
-            <h2 className="text-primary fw-bold text-center">Attendance Records</h2>
+            <div className="d-flex justify-content-between align-items-center mb-3">
+                <h2 className="text-primary fw-bold">Attendance Records</h2>
+                <CSVLink
+                    data={exportData}
+                    headers={exportHeaders}
+                    filename={`attendance_export_${new Date().toISOString()}.csv`}
+                    className="btn btn-success"
+                >
+                    Export to Excel
+                </CSVLink>
+            </div>
 
             {error && <p className="text-danger text-center">{error}</p>}
 
-            {/* ✅ Filter Section */}
+            {/* Filter Section */}
             <div className="card p-3 mb-4">
                 <div className="row">
                     <div className="col-md-4">
                         <label>Course ID</label>
-                        <input 
-                            type="text" 
-                            className="form-control" 
-                            name="courseId" 
-                            value={filters.courseId} 
-                            onChange={handleFilterChange} 
-                        />
+                        <select
+                            className="form-control"
+                            name="courseId"
+                            value={filters.courseId}
+                            onChange={handleFilterChange}
+                        >
+                            <option value="">All Courses</option>
+                            {courses.map(course => (
+                                <option key={course.courseId} value={course.courseId}>
+                                    {course.courseId} - {course.course_title}
+                                </option>
+                            ))}
+                        </select>
                     </div>
                     <div className="col-md-4">
                         <label>Batch No</label>
-                        <input 
-                            type="text" 
-                            className="form-control" 
-                            name="batch_no" 
-                            value={filters.batch_no} 
-                            onChange={handleFilterChange} 
-                        />
+                        <select
+                            className="form-control"
+                            name="batch_no"
+                            value={filters.batch_no}
+                            onChange={handleFilterChange}
+                        >
+                            <option value="">All Batches</option>
+                            {courses.map(course => (
+                                <option key={course.batch_no} value={course.batch_no}>
+                                    {course.batch_no}
+                                </option>
+                            ))}
+                        </select>
                     </div>
                     <div className="col-md-4">
                         <label>Student Name</label>
-                        <input 
-                            type="text" 
-                            className="form-control" 
-                            name="student_name" 
-                            value={filters.student_name} 
-                            onChange={handleFilterChange} 
+                        <input
+                            type="text"
+                            className="form-control"
+                            name="student_name"
+                            value={filters.student_name}
+                            onChange={handleFilterChange}
                         />
                     </div>
                 </div>
-                <button className="btn btn-primary mt-3" onClick={applyFilters}>Apply Filters</button>
+                <button className="btn btn-primary mt-3" onClick={fetchAttendanceRecords}>Apply Filters</button>
             </div>
 
-            {/* ✅ Attendance Table */}
             {loading ? (
                 <p className="text-center">Loading attendance data...</p>
             ) : (

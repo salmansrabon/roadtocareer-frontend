@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
+import { CSVLink } from "react-csv";
+
 
 export default function UnpaidStudents() {
     const router = useRouter();
@@ -11,7 +13,8 @@ export default function UnpaidStudents() {
     const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-    
+    const [exportData, setExportData] = useState([]);
+
     // Filters
     const [month, setMonth] = useState("");
     const [batchNo, setBatchNo] = useState("");
@@ -21,6 +24,7 @@ export default function UnpaidStudents() {
     useEffect(() => {
         fetchCourses();
         fetchUnpaidStudents();
+        fetchExportData();
     }, [month, batchNo, courseId, currentPage]);
 
     const fetchCourses = async () => {
@@ -52,16 +56,78 @@ export default function UnpaidStudents() {
             setTotalUnpaid(response.data.totalUnpaid);
             setTotalPages(response.data.totalPages);
         } catch (err) {
-            setError("Failed to load unpaid students.");
+            if (err.response) {
+                const status = err.response.status;
+                if (status === 400 || status === 404) {
+                    setError(err.response.data.message || "Invalid request or data not found.");
+                } else if (status === 401) {
+                    setError("Unauthorized. Redirecting to login...");
+                    localStorage.removeItem("token");
+                    router.push("/login");
+                } else if (status === 403) {
+                    setError("Access forbidden: " + (err.response.data.message || "You are not allowed to access this resource."));
+                } else if (status === 500) {
+                    setError("Internal Server Error. Please try again later.");
+                } else {
+                    setError("An unexpected error occurred.");
+                }
+            } else {
+                setError("Network error or server not reachable.");
+            }
         } finally {
             setLoading(false);
         }
     };
 
+    
+    const fetchExportData = async () => {
+        try {
+            const params = {};
+            if (month) params.month = month;
+            if (batchNo) params.batch_no = batchNo;
+            if (courseId) params.courseId = courseId;
+
+            // fetch all by setting high limit
+            params.limit = 1000;
+            params.offset = 0;
+
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/payments/unpaid`, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+                params,
+            });
+
+            setExportData(response.data.unpaidStudents || []);
+        } catch (err) {
+            console.error("Failed to fetch export data");
+        }
+    };
+
+    const exportHeaders = [
+        { label: "Student ID", key: "studentId" },
+        { label: "Student Name", key: "student_name" },
+        { label: "Course ID", key: "courseId" },
+        { label: "Batch No", key: "batch_no" },
+        { label: "Mobile", key: "mobile" },
+        { label: "Email", key: "email" }
+    ];
+
     return (
         <div className="container-fluid mt-4">
             <div className="card shadow-lg p-4">
-                <h2 className="text-primary fw-bold text-center">Unpaid Students List ({totalUnpaid})</h2>
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                    <h2 className="text-primary fw-bold">Unpaid Students List ({totalUnpaid})</h2>
+                    <CSVLink
+                        data={exportData} // 👈 use full export data instead of `students`
+                        headers={exportHeaders}
+                        filename={`unpaid_students_${new Date().toISOString()}.csv`}
+                        className="btn btn-success"
+                    >
+                        Export to Excel
+                    </CSVLink>
+
+                </div>
 
                 {/* Filters Section */}
                 <div className="row mb-3">
@@ -137,7 +203,6 @@ export default function UnpaidStudents() {
                         </table>
                     </div>
                 )}
-
                 {/* Pagination */}
                 {totalPages > 1 && (
                     <div className="d-flex justify-content-center mt-3">

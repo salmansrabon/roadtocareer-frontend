@@ -46,7 +46,7 @@ const Navbar = () => {
                 style={{ cursor: "pointer" }} 
                 onClick={() => router.push("/dashboard")}
             >
-                Admin Dashboard
+                Dashboard
             </h2>
 
             {/* ✅ Profile Dropdown */}
