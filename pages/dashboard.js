@@ -6,13 +6,13 @@ export default function Dashboard() {
     const [courses, setCourses] = useState([]);
     const [selectedCourse, setSelectedCourse] = useState("");
     const [selectedMonth, setSelectedMonth] = useState(new Date().toLocaleString('default', { month: 'long' }));
-    
+
     const [totalPaidAmount, setTotalPaidAmount] = useState(0);
     const [totalDueAmount, setTotalDueAmount] = useState(0);
     const [unpaidStudents, setUnpaidStudents] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-    const router = useRouter(); // ✅ Initialize Router
+    const router = useRouter();
 
     useEffect(() => {
         fetchCourses();
@@ -24,107 +24,91 @@ export default function Dashboard() {
         }
     }, [selectedCourse, selectedMonth]);
 
-    // ✅ Fetch Courses List (Latest First)
     const fetchCourses = async () => {
         try {
             const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/courses/list`);
             if (response.data.courses.length > 0) {
                 const sortedCourses = response.data.courses.sort((a, b) => b.courseId.localeCompare(a.courseId));
                 setCourses(sortedCourses);
-                setSelectedCourse(sortedCourses[0]?.courseId || ""); // Default to latest course
+                setSelectedCourse(sortedCourses[0]?.courseId || "");
             }
         } catch (err) {
             console.error("Failed to fetch courses:", err);
         }
     };
 
-    // ✅ Fetch Dashboard Data
     const fetchDashboardData = async () => {
         setLoading(true);
         setError("");
-    
+
         try {
             const token = localStorage.getItem("token");
             if (!token) {
                 router.push("/login");
                 return;
             }
-    
-            // ✅ Fetch Payments Data
+
             const paymentResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/payments?courseId=${selectedCourse}&month=${selectedMonth}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-    
+
             setTotalPaidAmount(paymentResponse.data.totalPaidAmount);
-    
-            // ✅ Fetch Students Data to Calculate Unpaid & Due
+
+            const unpaidResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/payments/unpaid?courseId=${selectedCourse}&month=${selectedMonth}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            setUnpaidStudents(unpaidResponse.data.totalUnpaid);
+
             const studentsResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/students/list?courseId=${selectedCourse}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-    
+
             const students = studentsResponse.data.students || [];
-    
+
             let totalDue = 0;
-            let unpaidCount = 0;
-    
             students.forEach(student => {
-                // ✅ Ignore students who are not enrolled
                 if (!student.isEnrolled) return;
-    
-                // ✅ Check if student has made any payment
-                const paidStudent = paymentResponse.data.payments.find(p => p.studentId === student.StudentId);
-                if (!paidStudent) unpaidCount += 1; // ✅ Count unpaid students
-    
-                totalDue += parseFloat(student.due || 0); // ✅ Sum total due
+                totalDue += parseFloat(student.due || 0);
             });
-    
+
             setTotalDueAmount(totalDue);
-            setUnpaidStudents(unpaidCount);
-    
+
         } catch (err) {
             console.error("Error fetching dashboard data:", err);
-    
+
             if (err.response) {
-                // ✅ Handle Unauthorized (401) or Forbidden (403)
                 if (err.response.status === 401 || err.response.status === 403) {
                     alert("Session expired. Please log in again.");
-                    localStorage.removeItem("token"); // ✅ Remove invalid token
-                    router.push("/login"); // ✅ Redirect to login page
+                    localStorage.removeItem("token");
+                    router.push("/login");
                     return;
                 }
-    
-                // ✅ Handle other API errors
+
                 setError(err.response.data?.message || "Failed to load dashboard data.");
             } else {
-                // ✅ Handle Network or Unexpected Errors
                 setError("Network error. Please check your internet connection.");
             }
         }
-    
+
         setLoading(false);
     };
-    
 
     return (
         <div className="container mt-5">
             <h2 className="fw-bold text-primary text-center">📊 Payment Dashboard</h2>
 
-            {/* ✅ Filters Section */}
             <div className="row mb-4">
-                {/* Month Dropdown */}
                 <div className="col-md-6">
                     <label className="form-label fw-bold">Select Month</label>
                     <select className="form-control" value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)}>
-                        {[
-                            "January", "February", "March", "April", "May", "June",
-                            "July", "August", "September", "October", "November", "December"
-                        ].map((month) => (
-                            <option key={month} value={month}>{month}</option>
+                        {["January", "February", "March", "April", "May", "June",
+                            "July", "August", "September", "October", "November", "December"].map((month) => (
+                                <option key={month} value={month}>{month}</option>
                         ))}
                     </select>
                 </div>
 
-                {/* Course Dropdown */}
                 <div className="col-md-6">
                     <label className="form-label fw-bold">Select Course</label>
                     <select className="form-control" value={selectedCourse} onChange={(e) => setSelectedCourse(e.target.value)}>
@@ -137,14 +121,12 @@ export default function Dashboard() {
                 </div>
             </div>
 
-            {/* ✅ Summary Cards */}
             {loading ? (
                 <p className="text-center">Loading dashboard data...</p>
             ) : error ? (
                 <p className="text-danger text-center">{error}</p>
             ) : (
                 <div className="row">
-                    {/* Total Payment Collection */}
                     <div className="col-md-4">
                         <div className="card shadow-lg border-0 text-center p-4">
                             <h5 className="fw-bold text-success">💰 Total Collection</h5>
@@ -152,7 +134,6 @@ export default function Dashboard() {
                         </div>
                     </div>
 
-                    {/* Total Due */}
                     <div className="col-md-4">
                         <div className="card shadow-lg border-0 text-center p-4">
                             <h5 className="fw-bold text-danger">📉 Total Due</h5>
@@ -160,7 +141,6 @@ export default function Dashboard() {
                         </div>
                     </div>
 
-                    {/* Number of Unpaid Students */}
                     <div className="col-md-4">
                         <div className="card shadow-lg border-0 text-center p-4">
                             <h5 className="fw-bold text-warning">🙅 Unpaid Students</h5>
