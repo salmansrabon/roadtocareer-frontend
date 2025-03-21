@@ -14,6 +14,7 @@ const Sidebar = ({ role, isOpen, toggleSidebar }) => {
             { name: "Create Modules", path: "/modules" },
             { name: "Student List", path: "/student-list" },
             { name: "Payment List", path: "/payments" },
+            { name: "Unpaid Student List", path: "/unpaidStudents" },
             { name: "Student Review", path: "/reviews/add" },
             { name: "Attendance", path: "/attendanceList" },
             { name: "Quiz Config", path: "/quiz/QuizConfigList" }
