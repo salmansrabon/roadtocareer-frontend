@@ -1,36 +1,35 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { FaBars } from "react-icons/fa";
+import { FaBars, FaChartBar, FaChalkboardTeacher, FaBoxOpen, FaCubes, FaUsers, FaMoneyCheckAlt, FaUserSlash, FaStar, FaClipboardList, FaQuestionCircle, FaUserGraduate, FaCertificate } from "react-icons/fa";
 
 const Sidebar = ({ role, isOpen, toggleSidebar }) => {
     const router = useRouter();
 
-    const menuItems = role === "admin" 
+    const menuItems = role === "admin"
         ? [
-            { name: "Dashboard", path: "/dashboard" },
-            { name: "Create Course", path: "/course/list" },
-            { name: "Create Package", path: "/create-package" },
-            { name: "Create Modules", path: "/modules" },
-            { name: "Student List", path: "/student-list" },
-            { name: "Payment List", path: "/payments" },
-            { name: "Unpaid Student List", path: "/unpaidStudents" },
-            { name: "Student Review", path: "/reviews/add" },
-            { name: "Attendance", path: "/attendanceList" },
-            { name: "Quiz Config", path: "/quiz/QuizConfigList" }
+            { name: "Dashboard", path: "/dashboard", icon: FaChartBar },
+            { name: "Create Course", path: "/course/list", icon: FaChalkboardTeacher },
+            { name: "Create Package", path: "/create-package", icon: FaBoxOpen },
+            { name: "Create Modules", path: "/modules", icon: FaCubes },
+            { name: "Student List", path: "/student-list", icon: FaUsers },
+            { name: "Payment List", path: "/payments", icon: FaMoneyCheckAlt },
+            { name: "Unpaid Student List", path: "/unpaidStudents", icon: FaUserSlash },
+            { name: "Student Review", path: "/reviews/add", icon: FaStar },
+            { name: "Attendance", path: "/attendanceList", icon: FaClipboardList },
+            { name: "Quiz Config", path: "/quiz/QuizConfigList", icon: FaQuestionCircle }
         ]
         : role === "student"
         ? [
-            { name: "My Dashboard", path: "/mydashboard" },
-            { name: "Attendance", path: "/attendance" },
-            { name: "Certificate", path: "/certificate" },
-            { name: "Quiz", path: "/quiz/QuizConfig" }
+            { name: "My Dashboard", path: "/mydashboard", icon: FaChartBar },
+            { name: "Attendance", path: "/attendance", icon: FaClipboardList },
+            { name: "Certificate", path: "/certificate", icon: FaCertificate },
+            { name: "Quiz", path: "/quiz/QuizConfig", icon: FaQuestionCircle }
         ]
         : [];
 
     return (
         <>
-            {/* ✅ Drawer Button - Only visible in mobile view */}
             <button 
                 className="btn btn-warning d-md-none position-fixed top-0 start-0 m-3"
                 onClick={toggleSidebar}
@@ -39,9 +38,8 @@ const Sidebar = ({ role, isOpen, toggleSidebar }) => {
                 <FaBars />
             </button>
 
-            {/* ✅ Sidebar - Always Open on Desktop, Toggleable on Mobile */}
             <div
-                className={`d-flex flex-column p-3 bg-dark text-white shadow-lg position-fixed vh-100`}
+                className="d-flex flex-column p-3 bg-dark text-white shadow-lg position-fixed vh-100"
                 style={{
                     width: isOpen ? "260px" : "0",
                     overflow: "hidden",
@@ -57,6 +55,9 @@ const Sidebar = ({ role, isOpen, toggleSidebar }) => {
                                 <span 
                                     className={`nav-link d-flex align-items-center text-white px-3 py-2 ${router.pathname === item.path ? "bg-warning text-dark fw-bold" : ""}`}
                                 >
+                                    {item.icon && (
+                                        <span className="me-2">{item.icon && <item.icon />}</span>
+                                    )}
                                     {item.name}
                                 </span>
                             </Link>

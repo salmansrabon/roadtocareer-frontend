@@ -24,48 +24,42 @@ export default function AddReview() {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
 
-    // ✅ Handle Input Change
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    // ✅ Handle Image Upload
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         setImage(file);
         setImagePreview(URL.createObjectURL(file));
     };
 
-    // ✅ Handle Form Submission
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setMessage("");
 
         try {
-            // 🔹 Upload Image First
             const formDataImage = new FormData();
             formDataImage.append("image", image);
 
-            const imageUploadRes = await axios.post(process.env.NEXT_PUBLIC_API_URL+"/images/upload", formDataImage, {
+            const imageUploadRes = await axios.post(process.env.NEXT_PUBLIC_API_URL + "/images/upload", formDataImage, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
 
-            const uploadedImageUrl = process.env.NEXT_PUBLIC_API_URL+`${imageUploadRes.data.imageUrl}`; // ✅ Get image URL from response
+            const uploadedImageUrl = process.env.NEXT_PUBLIC_API_URL + `${imageUploadRes.data.imageUrl}`;
 
-            // 🔹 Submit Review Data
             const reviewData = {
                 ...formData,
                 image: uploadedImageUrl,
             };
 
-            await axios.post(process.env.NEXT_PUBLIC_API_URL+"/reviews/create", reviewData);
+            await axios.post(process.env.NEXT_PUBLIC_API_URL + "/reviews/create", reviewData);
 
             setMessage("Review added successfully!");
             setLoading(false);
 
-            // ✅ Redirect to Reviews Page After Success
             setTimeout(() => {
                 router.push("/reviews");
             }, 2000);
@@ -78,87 +72,86 @@ export default function AddReview() {
 
     return (
         <div className="container mt-5">
-            <h2 className="fw-bold text-primary text-center mb-4">Add a Review</h2>
+            <div className="row justify-content-center">
+                <div className="col-lg-10">
+                    <div className="card shadow-lg p-4 border-0">
+                        <h2 className="fw-bold text-primary text-center mb-4">✨ Add a Review</h2>
 
-            {message && <div className="alert alert-info text-center">{message}</div>}
+                        {message && <div className="alert alert-info text-center fw-bold">{message}</div>}
 
-            <form onSubmit={handleSubmit} className="card p-4 shadow">
-                <div className="row">
-                    {/* ✅ Name */}
-                    <div className="col-md-6 mb-3">
-                        <label className="form-label">Name:</label>
-                        <input type="text" name="name" className="form-control" required value={formData.name} onChange={handleChange} />
-                    </div>
+                        <form onSubmit={handleSubmit}>
+                            <div className="row g-3">
+                                <div className="col-md-6">
+                                    <label className="form-label">Name</label>
+                                    <input type="text" name="name" className="form-control" required value={formData.name} onChange={handleChange} />
+                                </div>
 
-                    {/* ✅ Batch */}
-                    <div className="col-md-6 mb-3">
-                        <label className="form-label">Batch:</label>
-                        <input type="number" name="batch" className="form-control" required value={formData.batch} onChange={handleChange} />
-                    </div>
+                                <div className="col-md-6">
+                                    <label className="form-label">Batch</label>
+                                    <input type="number" name="batch" className="form-control" required value={formData.batch} onChange={handleChange} />
+                                </div>
 
-                    {/* ✅ Rating */}
-                    <div className="col-md-6 mb-3">
-                        <label className="form-label">Rating (1-5):</label>
-                        <input type="number" name="rating" className="form-control" min="1" max="5" required value={formData.rating} onChange={handleChange} />
-                    </div>
+                                <div className="col-md-6">
+                                    <label className="form-label">Rating (1-5)</label>
+                                    <input type="number" name="rating" min="1" max="5" className="form-control" required value={formData.rating} onChange={handleChange} />
+                                </div>
 
-                    {/* ✅ Priority */}
-                    <div className="col-md-6 mb-3">
-                        <label className="form-label">Priority:</label>
-                        <input type="number" name="priority" className="form-control" required value={formData.priority} onChange={handleChange} />
-                    </div>
+                                <div className="col-md-6">
+                                    <label className="form-label">Priority</label>
+                                    <input type="number" name="priority" className="form-control" required value={formData.priority} onChange={handleChange} />
+                                </div>
 
-                    {/* ✅ Description */}
-                    <div className="col-12 mb-3">
-                        <label className="form-label">Description:</label>
-                        <textarea name="description" className="form-control" required rows="3" value={formData.description} onChange={handleChange}></textarea>
-                    </div>
+                                <div className="col-12">
+                                    <label className="form-label">Description</label>
+                                    <textarea name="description" rows="4" className="form-control" required value={formData.description} onChange={handleChange}></textarea>
+                                </div>
 
-                    {/* ✅ Designation & Company */}
-                    <div className="col-md-6 mb-3">
-                        <label className="form-label">Designation:</label>
-                        <input type="text" name="designation" className="form-control" required value={formData.designation} onChange={handleChange} />
-                    </div>
-                    <div className="col-md-6 mb-3">
-                        <label className="form-label">Company:</label>
-                        <input type="text" name="company" className="form-control" required value={formData.company} onChange={handleChange} />
-                    </div>
+                                <div className="col-md-6">
+                                    <label className="form-label">Designation</label>
+                                    <input type="text" name="designation" className="form-control" required value={formData.designation} onChange={handleChange} />
+                                </div>
 
-                    {/* ✅ University */}
-                    <div className="col-md-6 mb-3">
-                        <label className="form-label">University:</label>
-                        <input type="text" name="university" className="form-control" required value={formData.university} onChange={handleChange} />
-                    </div>
+                                <div className="col-md-6">
+                                    <label className="form-label">Company</label>
+                                    <input type="text" name="company" className="form-control" required value={formData.company} onChange={handleChange} />
+                                </div>
 
-                    {/* ✅ Social Links */}
-                    <div className="col-md-6 mb-3">
-                        <label className="form-label">Facebook:</label>
-                        <input type="url" name="facebook" className="form-control" value={formData.facebook} onChange={handleChange} />
-                    </div>
-                    <div className="col-md-6 mb-3">
-                        <label className="form-label">WhatsApp:</label>
-                        <input type="text" name="whatsapp" className="form-control" value={formData.whatsapp} onChange={handleChange} />
-                    </div>
-                    <div className="col-md-6 mb-3">
-                        <label className="form-label">LinkedIn:</label>
-                        <input type="url" name="linkedin" className="form-control" value={formData.linkedin} onChange={handleChange} />
-                    </div>
+                                <div className="col-md-6">
+                                    <label className="form-label">University</label>
+                                    <input type="text" name="university" className="form-control" required value={formData.university} onChange={handleChange} />
+                                </div>
 
-                    {/* ✅ Image Upload */}
-                    <div className="col-12 mb-3">
-                        <label className="form-label">Upload Image:</label>
-                        <input type="file" className="form-control" accept="image/*" onChange={handleImageChange} required />
-                        {imagePreview && <img src={imagePreview} alt="Preview" className="mt-2 img-thumbnail" style={{ maxWidth: "150px" }} />}
-                    </div>
+                                <div className="col-md-6">
+                                    <label className="form-label">Facebook</label>
+                                    <input type="url" name="facebook" className="form-control" value={formData.facebook} onChange={handleChange} />
+                                </div>
 
-                    {/* ✅ Submit Button */}
-                    <div className="col-12 text-center">
-                        <button type="submit" className="btn btn-success" disabled={loading}>
-                            {loading ? "Submitting..." : "Submit Review"}
-                        </button>
+                                <div className="col-md-6">
+                                    <label className="form-label">WhatsApp</label>
+                                    <input type="text" name="whatsapp" className="form-control" value={formData.whatsapp} onChange={handleChange} />
+                                </div>
+
+                                <div className="col-md-6">
+                                    <label className="form-label">LinkedIn</label>
+                                    <input type="url" name="linkedin" className="form-control" value={formData.linkedin} onChange={handleChange} />
+                                </div>
+
+                                <div className="col-md-12">
+                                    <label className="form-label">Upload Image</label>
+                                    <input type="file" accept="image/*" className="form-control" onChange={handleImageChange} required />
+                                    {imagePreview && <img src={imagePreview} alt="Preview" className="img-thumbnail mt-3" style={{ maxWidth: "150px" }} />}
+                                </div>
+
+                                <div className="col-12 text-center">
+                                    <button type="submit" className="btn btn-success px-4 py-2 fw-bold" disabled={loading}>
+                                        {loading ? "Submitting..." : "Submit Review"}
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
-            </form>
+            </div>
         </div>
     );
 }
