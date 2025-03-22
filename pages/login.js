@@ -59,7 +59,7 @@ export default function Login() {
                             type="text"
                             className="form-control"
                             placeholder="Enter username"
-                            onChange={(e) => setUsername(e.target.value)}
+                            onChange={(e) => setUsername(e.target.value.trim())}
                             required
                         />
                     </div>
@@ -69,7 +69,7 @@ export default function Login() {
                             type="password"
                             className="form-control"
                             placeholder="Enter password"
-                            onChange={(e) => setPassword(e.target.value)}
+                            onChange={(e) => setPassword(e.target.value.trim())}
                             required
                         />
                     </div>

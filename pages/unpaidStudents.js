@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
 import { CSVLink } from "react-csv";
-
+import Link from "next/link";
 
 export default function UnpaidStudents() {
     const router = useRouter();
@@ -14,8 +14,9 @@ export default function UnpaidStudents() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [exportData, setExportData] = useState([]);
+    const [selectedStudentIds, setSelectedStudentIds] = useState(new Set());
+    const [selectAll, setSelectAll] = useState(false);
 
-    // Filters
     const [month, setMonth] = useState("");
     const [batchNo, setBatchNo] = useState("");
     const [courseId, setCourseId] = useState("");
@@ -23,6 +24,9 @@ export default function UnpaidStudents() {
 
     useEffect(() => {
         fetchCourses();
+    }, []);
+
+    useEffect(() => {
         fetchUnpaidStudents();
         fetchExportData();
     }, [month, batchNo, courseId, currentPage]);
@@ -79,15 +83,12 @@ export default function UnpaidStudents() {
         }
     };
 
-    
     const fetchExportData = async () => {
         try {
             const params = {};
             if (month) params.month = month;
             if (batchNo) params.batch_no = batchNo;
             if (courseId) params.courseId = courseId;
-
-            // fetch all by setting high limit
             params.limit = 1000;
             params.offset = 0;
 
@@ -99,6 +100,12 @@ export default function UnpaidStudents() {
             });
 
             setExportData(response.data.unpaidStudents || []);
+
+            // ✅ Pre-select all for Select All Across Pages
+            if (selectAll) {
+                const allIds = new Set(response.data.unpaidStudents.map(s => s.studentId));
+                setSelectedStudentIds(allIds);
+            }
         } catch (err) {
             console.error("Failed to fetch export data");
         }
@@ -113,23 +120,64 @@ export default function UnpaidStudents() {
         { label: "Email", key: "email" }
     ];
 
+    const toggleSelectAll = () => {
+        const newValue = !selectAll;
+        setSelectAll(newValue);
+        if (newValue) {
+            const allIds = new Set(exportData.map(s => s.studentId));
+            setSelectedStudentIds(allIds);
+        } else {
+            setSelectedStudentIds(new Set());
+        }
+    };
+
+    const handleSelectOne = (studentId) => {
+        const newSelectedIds = new Set(selectedStudentIds);
+        if (newSelectedIds.has(studentId)) newSelectedIds.delete(studentId);
+        else newSelectedIds.add(studentId);
+        setSelectedStudentIds(newSelectedIds);
+    };
+
+    const handleDeactivate = async () => {
+        try {
+            for (const studentId of selectedStudentIds) {
+                await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/users/${studentId}`, { isValid: 0 });
+            }
+            alert("Selected students deactivated successfully.");
+            fetchUnpaidStudents();
+            fetchExportData();
+            setSelectedStudentIds(new Set());
+            setSelectAll(false);
+        } catch (err) {
+            console.error("Deactivation error:", err);
+            alert("Failed to deactivate selected students.");
+        }
+    };
+
     return (
         <div className="container-fluid mt-4">
             <div className="card shadow-lg p-4">
+                <div className="d-flex justify-content-end mt-4">
+                    <button
+                        className="btn btn-danger"
+                        disabled={selectedStudentIds.size === 0}
+                        onClick={handleDeactivate}
+                    >
+                        Deactivate Selected
+                    </button>
+                </div>
                 <div className="d-flex justify-content-between align-items-center mb-3">
                     <h2 className="text-primary fw-bold">Unpaid Students List ({totalUnpaid})</h2>
                     <CSVLink
-                        data={exportData} // 👈 use full export data instead of `students`
+                        data={exportData}
                         headers={exportHeaders}
                         filename={`unpaid_students_${new Date().toISOString()}.csv`}
                         className="btn btn-success"
                     >
                         Export to Excel
                     </CSVLink>
-
                 </div>
 
-                {/* Filters Section */}
                 <div className="row mb-3">
                     <div className="col-md-4">
                         <label className="form-label">Select Month</label>
@@ -160,7 +208,6 @@ export default function UnpaidStudents() {
                     </div>
                 </div>
 
-                {/* Apply Filters Button */}
                 <button className="btn btn-primary mb-3" onClick={fetchUnpaidStudents}>Apply Filters</button>
 
                 {loading ? (
@@ -172,6 +219,13 @@ export default function UnpaidStudents() {
                         <table className="table table-bordered table-hover w-100">
                             <thead className="table-dark">
                                 <tr>
+                                    <th>
+                                        <input
+                                            type="checkbox"
+                                            checked={selectAll}
+                                            onChange={toggleSelectAll}
+                                        />
+                                    </th>
                                     <th>#</th>
                                     <th>Student ID</th>
                                     <th>Student Name</th>
@@ -185,8 +239,20 @@ export default function UnpaidStudents() {
                                 {students.length > 0 ? (
                                     students.map((student, index) => (
                                         <tr key={student.studentId}>
+                                            <td>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedStudentIds.has(student.studentId)}
+                                                    onChange={() => handleSelectOne(student.studentId)}
+                                                />
+                                            </td>
                                             <td>{(currentPage - 1) * limit + index + 1}</td>
-                                            <td>{student.studentId}</td>
+                                            <td>
+                                                <Link href={`/students/details/${student.studentId}`} className="text-decoration-none">
+                                                    {student.studentId}
+                                                </Link>
+                                            </td>
+
                                             <td>{student.student_name}</td>
                                             <td>{student.courseId}</td>
                                             <td>{student.batch_no}</td>
@@ -196,14 +262,14 @@ export default function UnpaidStudents() {
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan="7" className="text-center text-warning">No unpaid students found.</td>
+                                        <td colSpan="8" className="text-center text-warning">No unpaid students found.</td>
                                     </tr>
                                 )}
                             </tbody>
                         </table>
                     </div>
                 )}
-                {/* Pagination */}
+
                 {totalPages > 1 && (
                     <div className="d-flex justify-content-center mt-3">
                         <button

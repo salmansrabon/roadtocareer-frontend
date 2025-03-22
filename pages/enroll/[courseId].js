@@ -113,7 +113,7 @@ export default function EnrollStudent() {
             });
 
             setSuccess("Registration successful! Check your email for the confirmation.");
-            // setTimeout(() => router.push("/login"), 3000);
+            setTimeout(() => router.push("/login"), 5000);
         } catch (err) {
             console.error("Error registering student:", err);
 
@@ -156,17 +156,16 @@ export default function EnrollStudent() {
                     )}
                 </div>
 
-                {/* ✅ Show Error & Success Messages */}
-                {error && <div className="alert alert-danger">{error}</div>}
-                {success && <div className="alert alert-success">{success}</div>}
-
                 {/* ✅ Form */}
                 <form onSubmit={handleSubmit}>
                     <div className="row g-4">
                         {/* ✅ Salutation */}
                         <div className="col-md-6">
-                            <label className="form-label fw-bold">Salutation</label>
-                            <select className="form-control border-primary p-3" name="salutation" onChange={handleChange}>
+                            <label className="form-label fw-bold">Salutation
+                                <span className="text-danger fw-bold">*</span>
+                            </label>
+                            <select className="form-control border-primary p-3" name="salutation" required onChange={handleChange}>
+                                <option value="">Select...</option>
                                 <option value="Mr">Mr</option>
                                 <option value="Mrs">Mrs</option>
                             </select>
@@ -174,44 +173,61 @@ export default function EnrollStudent() {
 
                         {/* ✅ Full Name */}
                         <div className="col-md-6">
-                            <label className="form-label fw-bold">Full Name</label>
+                            <label className="form-label fw-bold">Full Name
+                                <span className="text-danger fw-bold">*</span>
+                            </label>
                             <input type="text" className="form-control border-primary p-3" name="student_name" required onChange={handleChange} />
                         </div>
 
                         {/* ✅ Email */}
                         <div className="col-md-6">
-                            <label className="form-label fw-bold">Email</label>
+                            <label className="form-label fw-bold">Email
+                                <span className="text-danger fw-bold">*</span>
+                            </label>
                             <input
                                 type="email"
                                 className="form-control border-primary p-3"
                                 name="email"
                                 required
+                                placeholder="Enter your Gmail address"
                                 onChange={(e) => {
-                                    const value = e.target.value;
+                                    const value = e.target.value.trim();
+                                    const input = e.target;
+
                                     if (value === "" || value.endsWith("@gmail.com")) {
-                                        handleChange(e); // ✅ Update state only if it's a Gmail address
+                                        input.setCustomValidity("");
+                                        handleChange(e);
+                                    } else {
+                                        input.setCustomValidity("Only Gmail addresses are allowed");
+                                        input.reportValidity(); // ✅ Force immediate error display
                                     }
                                 }}
-                                placeholder="Enter your Gmail address"
+                                onInvalid={(e) => e.target.setCustomValidity("Only Gmail addresses are allowed")}
+                                onInput={(e) => e.target.setCustomValidity("")}
                             />
                         </div>
 
-
                         {/* ✅ Mobile */}
                         <div className="col-md-6">
-                            <label className="form-label fw-bold">Mobile</label>
+                            <label className="form-label fw-bold">Mobile
+                                <span className="text-danger fw-bold">*</span>
+                            </label>
                             <input type="text" className="form-control border-primary p-3" name="mobile" required onChange={handleChange} />
                         </div>
 
                         {/* ✅ Location */}
                         <div className="col-md-6">
-                            <label className="form-label fw-bold">Location</label>
-                            <input type="text" className="form-control border-primary p-3" name="address" onChange={handleChange} />
+                            <label className="form-label fw-bold">Location
+                                <span className="text-danger fw-bold">*</span>
+                            </label>
+                            <input type="text" className="form-control border-primary p-3" name="address" required onChange={handleChange} placeholder="The area where you live" />
                         </div>
 
                         {/* ✅ University */}
                         <div className="col-md-6 position-relative">
-                            <label className="form-label fw-bold">University</label>
+                            <label className="form-label fw-bold">University
+                                <span className="text-danger fw-bold">*</span>
+                            </label>
                             <input
                                 type="text"
                                 className="form-control border-primary p-3"
@@ -243,13 +259,17 @@ export default function EnrollStudent() {
 
                         {/* ✅ Passing Year */}
                         <div className="col-md-6">
-                            <label className="form-label fw-bold">Passing Year/Semester</label>
-                            <input type="text" className="form-control border-primary p-3" name="passingYear" onChange={handleChange} />
+                            <label className="form-label fw-bold">Passing Year/Semester
+                                <span className="text-danger fw-bold">*</span>
+                            </label>
+                            <input type="text" className="form-control border-primary p-3" name="passingYear" required onChange={handleChange} placeholder="e.g. 01,2025" />
                         </div>
 
                         {/* ✅ Profession */}
                         <div className="col-md-6">
-                            <label className="form-label fw-bold">Profession</label>
+                            <label className="form-label fw-bold">Profession
+                                <span className="text-danger fw-bold">*</span>
+                            </label>
                             <select className="form-control border-primary p-3" name="profession" onChange={handleChange}>
                                 <option value="">Select...</option>
                                 <option value="Fresh Graduate">Fresh Graduate</option>
@@ -278,7 +298,9 @@ export default function EnrollStudent() {
 
                         {/* ✅ Package Dropdown (Fetched from API) */}
                         <div className="col-md-6">
-                            <label className="form-label fw-bold">Package</label>
+                            <label className="form-label fw-bold">Package
+                                <span className="text-danger fw-bold">*</span>
+                            </label>
                             <select className="form-control border-primary p-3" name="package_name" required onChange={handleChange}>
                                 <option value="">Select...</option>
                                 {packages.map(pkg => (
@@ -289,7 +311,9 @@ export default function EnrollStudent() {
 
                         {/* ✅ KnowMe & Opinion */}
                         <div className="col-md-6">
-                            <label className="form-label fw-bold">How do you know us?</label>
+                            <label className="form-label fw-bold">How do you know us?
+                                <span className="text-danger fw-bold">*</span>
+                            </label>
                             <select className="form-control border-primary p-3" name="knowMe" required onChange={handleChange}>
                                 <option value="">Select...</option>
                                 <option value="Facebook">Facebook</option>
@@ -307,6 +331,9 @@ export default function EnrollStudent() {
                         {loading ? "Submitting..." : "Register Now"}
                     </button>
                 </form>
+                {/* ✅ Show Error & Success Messages */}
+                {error && <div className="alert alert-danger text-center">{error}</div>}
+                {success && <div className="alert alert-success text-center">{success}</div>}
             </div>
         </div>
     );

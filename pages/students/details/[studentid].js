@@ -257,6 +257,7 @@ export default function StudentDetails() {
                         </td>
                     </tr>
                     <tr><td><strong>Course Fee</strong></td><td>{student.courseFee || "N/A"}</td></tr>
+                    <tr><td><strong>Due</strong></td><td>{student.due || "N/A"}</td></tr>
                     <tr><td><strong>Company</strong></td>
                         <td>
                             {isEditing ? (
@@ -381,6 +382,12 @@ export default function StudentDetails() {
                         </button>
                         <button className="btn btn-danger me-2" onClick={handleDelete}>
                             Delete
+                        </button>
+                        <button
+                            className="btn btn-success me-2"
+                            onClick={() => router.push(`/students/payments/history/${studentid}`)} // ✅ Added redirection
+                        >
+                            Add Payment
                         </button>
                     </>
                 )}
