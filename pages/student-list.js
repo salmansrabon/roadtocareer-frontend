@@ -68,6 +68,7 @@ export default function StudentList() {
                 // ✅ Handle Unauthorized (401) and Forbidden (403) responses
                 if (err.response.status === 401) {
                     setError("Unauthorized Access: " + err.response.data.message);
+                    router.push("/login");
                 } else if (err.response.status === 403) {
                     setError("Forbidden: " + err.response.data.message);
                 } else {
@@ -106,15 +107,20 @@ export default function StudentList() {
         }
     };
 
-    const exportHeaders = [ // ✅ [NEW] CSV headers
+    const exportHeaders = [
         { label: "Course ID", key: "Course.courseId" },
         { label: "Batch No", key: "batch_no" },
         { label: "Student ID", key: "StudentId" },
         { label: "Student Name", key: "student_name" },
         { label: "Email", key: "email" },
         { label: "Mobile", key: "mobile" },
-        { label: "Profession", key: "profession" },
         { label: "University", key: "university" },
+        { label: "Profession", key: "profession" },
+        { label: "Company", key: "company" },
+        { label: "Designation", key: "designation" },
+        { label: "Expereience", key: "experience" },
+        { label: "KnowUs", key: "knowMe" },
+        { label: "Opinion", key: "opinion" },
         { label: "Due", key: "due" },
         { label: "isValid", key: "User.isValid" },
         { label: "isEnrolled", key: "isEnrolled" }
@@ -140,7 +146,7 @@ export default function StudentList() {
     return (
         <div className="container-fluid mt-4">
             <div className="card shadow-lg p-4">
-            <div className="d-flex justify-content-between align-items-center mb-3"> {/* ✅ [NEW] Wrap heading + export */}
+            <div className="d-flex justify-content-between align-items-center mb-3">
                     <h2 className="text-primary fw-bold">Student List ({totalStudents})</h2>
                     <CSVLink
                         data={exportData}
