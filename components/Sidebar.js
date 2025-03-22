@@ -9,28 +9,33 @@ const Sidebar = ({ role, isOpen, toggleSidebar }) => {
     const menuItems = role === "admin"
         ? [
             { name: "Dashboard", path: "/dashboard", icon: FaChartBar },
-            { name: "Create Course", path: "/course/list", icon: FaChalkboardTeacher },
-            { name: "Create Package", path: "/create-package", icon: FaBoxOpen },
-            { name: "Create Modules", path: "/modules", icon: FaCubes },
             { name: "Student List", path: "/student-list", icon: FaUsers },
             { name: "Payment List", path: "/payments", icon: FaMoneyCheckAlt },
             { name: "Unpaid Student List", path: "/unpaidStudents", icon: FaUserSlash },
-            { name: "Student Review", path: "/reviews/add", icon: FaStar },
+
+            { name: "Create Course", path: "/course/list", icon: FaChalkboardTeacher },
+            { name: "Create Package", path: "/create-package", icon: FaBoxOpen },
+            { name: "Create Modules", path: "/modules", icon: FaCubes },
+
             { name: "Attendance", path: "/attendanceList", icon: FaClipboardList },
-            { name: "Quiz Config", path: "/quiz/QuizConfigList", icon: FaQuestionCircle }
+            { name: "Quiz Config", path: "/quiz/QuizConfigList", icon: FaQuestionCircle },
+
+            { name: "Student Review", path: "/reviews/add", icon: FaStar }
+
         ]
         : role === "student"
-        ? [
-            { name: "My Dashboard", path: "/mydashboard", icon: FaChartBar },
-            { name: "Attendance", path: "/attendance", icon: FaClipboardList },
-            { name: "Certificate", path: "/certificate", icon: FaCertificate },
-            { name: "Quiz", path: "/quiz/QuizConfig", icon: FaQuestionCircle }
-        ]
-        : [];
+            ? [
+                { name: "My Dashboard", path: "/mydashboard", icon: FaChartBar },
+                { name: "Attendance", path: "/attendance", icon: FaClipboardList },
+                { name: "Certificate", path: "/certificate", icon: FaCertificate },
+                { name: "Quiz", path: "/quiz/QuizConfig", icon: FaQuestionCircle }
+
+            ]
+            : [];
 
     return (
         <>
-            <button 
+            <button
                 className="btn btn-warning d-md-none position-fixed top-0 start-0 m-3"
                 onClick={toggleSidebar}
                 style={{ zIndex: 1050 }}
@@ -47,12 +52,17 @@ const Sidebar = ({ role, isOpen, toggleSidebar }) => {
                     zIndex: 1000,
                 }}
             >
-                <h4 className="text-center text-warning mb-3">Road to SDET</h4>
+                <h4 className="text-center text-warning mb-3">
+                    <Link href={`${process.env.NEXT_PUBLIC_FRONTEND_URL}`} target="_blank" className="text-warning text-decoration-none">
+                        Road to SDET
+                    </Link>
+                </h4>
+
                 <ul className="nav nav-pills flex-column mb-auto">
                     {menuItems.map((item, idx) => (
                         <li key={idx} className="nav-item">
                             <Link href={item.path} passHref>
-                                <span 
+                                <span
                                     className={`nav-link d-flex align-items-center text-white px-3 py-2 ${router.pathname === item.path ? "bg-warning text-dark fw-bold" : ""}`}
                                 >
                                     {item.icon && (

@@ -48,7 +48,7 @@ export default function CreatePackage() {
         try {
             const response = await axios.post(process.env.NEXT_PUBLIC_API_URL+"/packages/create", formData);
             setSuccess("Package created successfully!");
-            setTimeout(() => router.push("/courses"), 2000); // ✅ Redirect after success
+            setTimeout(() => router.push("/courses/list"), 2000); // ✅ Redirect after success
         } catch (err) {
             console.error("Error creating package:", err);
             

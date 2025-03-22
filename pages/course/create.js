@@ -88,7 +88,7 @@ export default function CreateCourse() {
 
             if (response.status === 201) {
                 setSuccess("Course created successfully!");
-                setTimeout(() => router.push("/courses"), 2000);
+                setTimeout(() => router.push("/courses/list"), 2000);
             } else {
                 setError("Unexpected response from server. Please try again.");
             }
