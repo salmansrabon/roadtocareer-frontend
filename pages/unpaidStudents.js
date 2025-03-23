@@ -70,6 +70,7 @@ export default function UnpaidStudents() {
                     router.push("/login");
                 } else if (status === 403) {
                     setError("Access forbidden: " + (err.response.data.message || "You are not allowed to access this resource."));
+                    router.push("/403");
                 } else if (status === 500) {
                     setError("Internal Server Error. Please try again later.");
                 } else {

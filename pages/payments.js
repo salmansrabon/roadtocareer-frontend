@@ -57,9 +57,8 @@ export default function PaymentList() {
                     localStorage.removeItem("token");
                     router.push("/login");
                 } else if (err.response.status === 403) {
-                    setError(err.response.data.message);
-                    localStorage.removeItem("token");
-                    router.push("/login");
+                    setError("Forbidden: " + err.response.data.message);
+                    router.push("/403");
                 } else {
                     setError("Failed to fetch payments: " + err.response.data.message);
                 }

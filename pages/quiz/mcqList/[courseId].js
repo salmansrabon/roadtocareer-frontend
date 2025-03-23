@@ -14,7 +14,7 @@ export default function McqList() {
         if (!courseId) return;
     
         // ✅ Fetch MCQs by Course ID
-        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/mcq/fetch/${courseId}`,{
+        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/mcq/admin/fetch/${courseId}`,{
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
             }
@@ -33,7 +33,8 @@ export default function McqList() {
                     } else if (err.response.status === 401) {
                         setError("Unauthorized! Please log in again.");
                     } else if (err.response.status === 403) {
-                        setError("Forbidden! You do not have permission to access this resource.");
+                        setError("Forbidden! You do not have permission to access this page.");
+                        router.push("/403");
                     } else if (err.response.status === 500) {
                         setError("Internal Server Error! Please try again later.");
                     } else {

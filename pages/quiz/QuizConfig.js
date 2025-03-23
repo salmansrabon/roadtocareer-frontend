@@ -116,7 +116,16 @@ export default function QuizConfig() {
             {loading ? (
                 <p className="text-center">Loading quiz details...</p>
             ) : error ? (
-                <p className="text-danger text-center">{error}</p>
+                <div className="text-danger text-center">
+                    <p>{error}</p>
+                    {error.includes("Quiz is not available") && (
+                        <p>
+                            <a href="/quiz/result" className="text-primary fw-bold">
+                                If you have already attempted, click here to show your result
+                            </a>
+                        </p>
+                    )}
+                </div>
             ) : quizConfig ? (
                 <div className="card p-4 shadow-lg">
                     <h3 className="fw-bold">{quizConfig.quiz_title}</h3>
@@ -159,7 +168,7 @@ export default function QuizConfig() {
                     </p>
 
                     {quizAttempted ? (
-                        <button 
+                        <button
                             className="btn btn-info mt-3"
                             onClick={() => router.push(`/result/${studentId}`)}
                         >

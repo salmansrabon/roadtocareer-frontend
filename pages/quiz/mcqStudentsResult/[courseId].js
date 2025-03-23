@@ -13,7 +13,11 @@ export default function McqStudentsResult() {
         if (!courseId) return;
     
         // ✅ Fetch results for the given CourseId
-        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/mcq/result/list/${courseId}`)
+        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/mcq/result/list/${courseId}`,{
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            }
+        })
             .then(res => {
                 setStudentResults(res.data.results);
             })
@@ -26,8 +30,10 @@ export default function McqStudentsResult() {
                         setError("No students found for this course.");
                     } else if (err.response.status === 401) {
                         setError("Unauthorized! Please log in again.");
+                        router.push("/login");
                     } else if (err.response.status === 403) {
-                        setError("Forbidden! You do not have permission to access this resource.");
+                        setError("Forbidden! You do not have permission to access this page.");
+                        router.push("/403");
                     } else if (err.response.status === 500) {
                         setError("Internal Server Error! Please try again later.");
                     } else {

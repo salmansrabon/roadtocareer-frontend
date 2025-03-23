@@ -62,8 +62,10 @@ export default function PaymentHistory() {
                 if (err.response) {
                     if (err.response.status === 401) {
                         setError("Unauthorized Access: " + err.response.data.message);
+                        router.push("/login");
                     } else if (err.response.status === 403) {
                         setError("Forbidden: " + err.response.data.message);
+                        router.push("/403");
                     } else {
                         setError("Failed to fetch payment history: " + err.response.data.message);
                     }

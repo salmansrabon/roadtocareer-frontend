@@ -103,6 +103,7 @@ export default function CreateCourse() {
                     setError("Unauthorized Access: " + err.response.data.message);
                 } else if (err.response.status === 403) {
                     setError("Forbidden: You do not have permission to create a course.");
+                    router.push("/403");
                 } else if (err.response.status === 409) {
                     setError("Conflict: Course already exists.");
                 } else if (err.response.status === 500) {

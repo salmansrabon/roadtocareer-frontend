@@ -33,11 +33,11 @@ export default function QuizConfigPage() {
                         break;
                     case 401:
                         setError("Unauthorized: Please log in to access this page.");
-                        router.push("/login"); // ✅ Redirect to login page
+                        router.push("/login");
                         break;
                     case 403:
-                        setError("Forbidden: You do not have permission to access this resource.");
-                        
+                        setError("Forbidden: You do not have permission to access this page.");
+                        router.push("/403");
                         break;
                     case 404:
                         setError("No quiz configurations found.");

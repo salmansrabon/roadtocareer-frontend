@@ -29,7 +29,7 @@ export default function QuizResult() {
 
     useEffect(() => {
         if (!studentId) return;
-
+    
         // ✅ Fetch Result Data
         axios.get(`${process.env.NEXT_PUBLIC_API_URL}/mcq/result/${studentId}`)
             .then(res => {
@@ -37,10 +37,35 @@ export default function QuizResult() {
             })
             .catch(err => {
                 console.error("Error fetching result:", err);
-                setError("Failed to load quiz results.");
+    
+                if (err.response) {
+                    const status = err.response.status;
+                    switch (status) {
+                        case 400:
+                            setError("Bad Request: Please check the student ID.");
+                            break;
+                        case 401:
+                            setError("Unauthorized: Please log in to view quiz results.");
+                            break;
+                        case 403:
+                            setError("Forbidden: You do not have permission to access this student's result.");
+                            break;
+                        case 404:
+                            setError("No quiz result found for this student.");
+                            break;
+                        case 500:
+                            setError("Internal Server Error: Please try again later.");
+                            break;
+                        default:
+                            setError("An unexpected error occurred.");
+                    }
+                } else {
+                    setError("Network error or server not reachable.");
+                }
             })
             .finally(() => setLoading(false));
     }, [studentId]);
+    
 
     return (
         <div className="container mt-5">
