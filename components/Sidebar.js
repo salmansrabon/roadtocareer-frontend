@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { FaBars, FaChartBar, FaChalkboardTeacher, FaBoxOpen, FaCubes, FaUsers, FaMoneyCheckAlt, FaUserSlash, FaStar, FaClipboardList, FaQuestionCircle, FaUserGraduate, FaCertificate } from "react-icons/fa";
+import { FaBars, FaChartBar, FaChalkboardTeacher, FaBoxOpen, FaCubes, FaUsers, FaMoneyCheckAlt, FaUserSlash, FaStar, FaClipboardList, FaQuestionCircle, FaUserGraduate, FaCertificate, FaUserFriends } from "react-icons/fa";
 
 const Sidebar = ({ role, isOpen, toggleSidebar }) => {
     const router = useRouter();
@@ -20,6 +20,7 @@ const Sidebar = ({ role, isOpen, toggleSidebar }) => {
             { name: "Attendance", path: "/attendanceList", icon: FaClipboardList },
             { name: "Quiz Config", path: "/quiz/QuizConfigList", icon: FaQuestionCircle },
 
+            { name: "Our Teams", path: "/teams/list", icon: FaUserFriends },
             { name: "Student Review", path: "/reviews/add", icon: FaStar }
 
         ]

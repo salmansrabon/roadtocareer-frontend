@@ -17,7 +17,7 @@ export default function TeamSection() {
         setError("");
 
         try {
-            const response = await axios.get(process.env.NEXT_PUBLIC_API_URL+"/teams");
+            const response = await axios.get(process.env.NEXT_PUBLIC_API_URL+"/teams/list");
             setTeamMembers(response.data.members);
         } catch (err) {
             setError("Failed to load team members.");
