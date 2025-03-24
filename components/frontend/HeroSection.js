@@ -1,12 +1,12 @@
 import Image from 'next/image';
-import heroImage from '../../public/hero-cartoon.png'; // Ensure you place the generated image in the public folder
+import heroImage from '../../public/hero-cartoon.png';
 
 export default function HeroSection() {
     const scrollToCourses = () => {
         const coursesSection = document.getElementById("courses");
         if (coursesSection) {
             window.scrollTo({
-                top: coursesSection.offsetTop - 70, // ✅ Adjust for navbar height
+                top: coursesSection.offsetTop - 70,
                 behavior: "smooth",
             });
         }
@@ -17,7 +17,7 @@ export default function HeroSection() {
             <div className="container">
                 <div className="row align-items-center">
                     {/* ✅ Left Side: Text Content */}
-                    <div className="col-md-6 text-start">
+                    <header className="col-md-6 text-start">
                         <h1 className="fw-bold display-4 text-dark">হয়ে উঠুন ইন্ডাস্ট্রি এক্সপার্ট</h1>
                         <p className="lead text-muted">
                             আমাদের চলার পথ খুব বেশিদিন না, মাত্র ৩ বছর। এই ৩ বছরে আপনাদের সাপোর্ট এবং ভালোবাসায় আমরা মুগ্ধ। 
@@ -30,7 +30,7 @@ export default function HeroSection() {
                         <button className="btn btn-primary btn-lg mt-3" onClick={scrollToCourses}>
                             Explore Courses
                         </button>
-                    </div>
+                    </header>
 
                     {/* ✅ Right Side: Image */}
                     <div className="col-md-6 text-center">

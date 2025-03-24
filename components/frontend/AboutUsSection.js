@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
+import Head from "next/head";
 
 const AboutUs = () => {
     const [achievements, setAchievements] = useState([]);
 
     useEffect(() => {
-        fetch("/data/aboutUsData.json") // Adjust the path if needed
+        fetch("/data/aboutUsData.json")
             .then((res) => res.json())
             .then((data) => setAchievements(data))
             .catch((error) => console.error("Error fetching About Us data:", error));

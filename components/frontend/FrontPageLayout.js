@@ -5,13 +5,13 @@ import { useRouter } from "next/router";
 const FrontPageLayout = ({ children }) => {
     const [menuOpen, setMenuOpen] = useState(false);
     const router = useRouter();
-    // ✅ Function to Smoothly Scroll to Sections
+    // Function to Smoothly Scroll to Sections
     const scrollToSection = (sectionId) => {
         if (router.pathname !== "/") {
-            // ✅ If not on the homepage, navigate first, then scroll
+            // If not on the homepage, navigate first, then scroll
             router.push(`/#${sectionId}`);
         } else {
-            // ✅ If already on home, just scroll smoothly
+            // If already on home, just scroll smoothly
             const section = document.getElementById(sectionId);
             if (section) {
                 window.scrollTo({
@@ -20,27 +20,27 @@ const FrontPageLayout = ({ children }) => {
                 });
                 window.history.pushState(null, null, `#${sectionId}`);
             }
-            setMenuOpen(false); // ✅ Close menu after clicking (mobile view)
+            setMenuOpen(false); //Close menu after clicking (mobile view)
         }
     };
 
 
     return (
         <div>
-            {/* ✅ Responsive Navbar */}
+            {/* Responsive Navbar */}
             <nav className="navbar fixed-top navbar-dark bg-dark px-4 d-flex justify-content-between">
-                <h2 className="text-warning" style={{ cursor: "pointer" }}>
+                <h1 className="text-warning" style={{ cursor: "pointer" }}>
                     <a href={process.env.NEXT_PUBLIC_FRONTEND_URL} className="text-warning text-decoration-none">
                         Road to SDET
                     </a>
-                </h2>
+                </h1>
 
-                {/* ✅ Mobile Menu Toggle Button */}
+                {/* Mobile Menu Toggle Button */}
                 <button className="menu-toggle d-md-none" onClick={() => setMenuOpen(!menuOpen)}>
                     ☰ Menu
                 </button>
 
-                {/* ✅ Menu Items (Shown in a row on desktop, dropdown on mobile) */}
+                {/* Menu Items (Shown in a row on desktop, dropdown on mobile) */}
                 <div className={`menu-items ${menuOpen ? "show" : ""}`}>
                     <span className="nav-link text-white" onClick={() => scrollToSection("courses")}>
                         Courses
@@ -63,10 +63,10 @@ const FrontPageLayout = ({ children }) => {
                 </div>
             </nav>
 
-            {/* ✅ Main Content */}
+            {/* Main Content */}
             <div className="content-container">{children}</div>
 
-            {/* ✅ Footer */}
+            {/* Footer */}
             <footer className="bg-dark text-white text-center p-4">
                 <h5>Contact Us</h5>
                 <p>📞 +88 01782 808 778 | ✉ roadtosdet@gmail.com</p>

@@ -1,7 +1,8 @@
 [
-    { "id": 1, "text": "✅ 100% Student satisfaction" },
-    { "id": 2, "text": "✅ Dedication support team during course and after course" },
-    { "id": 3, "text": "✅ Job Placement and Recommendation" },
-    { "id": 4, "text": "✅ 100+ company network" },
-    { "id": 5, "text": "✅ Provide free resource for existing students" }
+    { "id": 1, "text": "✅ 100% স্টুডেন্ট স্যাটিসফেকশন" },
+    { "id": 2, "text": "✅ কোর্স চলাকালীন সময়ে সার্বক্ষণিক সাপোর্ট প্রদান" },
+    { "id": 3, "text": "✅ জব প্লেসমেন্ট এবং ইন্টারভিউ কেস স্টাডি" },
+    { "id": 4, "text": "✅ ১০০ এর অধিক কোম্পানিতে নেটওয়ার্ক" },
+    { "id": 5, "text": "✅ পূর্ববর্তী ব্যাচ এর স্টুডেন্ট দের কেও সাপোর্ট প্রদান" },
+    { "id": 6, "text": "✅  0% নেগেটিভ ফিডব্যাক" }
 ]
