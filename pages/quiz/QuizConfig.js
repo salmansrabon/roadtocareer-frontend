@@ -51,22 +51,47 @@ export default function QuizConfig() {
 
     useEffect(() => {
         if (!courseId) return;
-
-        // ✅ Fetch Quiz Config for the Course
-        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/mcq-config/${courseId}`)
-            .then(res => {
+        //Fetch Quiz Config for the Course
+        axios
+            .get(`${process.env.NEXT_PUBLIC_API_URL}/mcq-config/${courseId}`)
+            .then((res) => {
                 if (res.data.mcqConfigs.length > 0) {
                     setQuizConfig(res.data.mcqConfigs[0]);
                 } else {
                     setError("No quiz configuration found.");
                 }
             })
-            .catch(err => {
+            .catch((err) => {
                 console.error("Error fetching quiz config:", err);
-                setError("Failed to load quiz configuration.");
+                if (err.response) {
+                    switch (err.response.status) {
+                        case 400:
+                            setError("Bad Request: Invalid course ID.");
+                            break;
+                        case 401:
+                            setError("Unauthorized: Please log in again.");
+                            router.push("/login");
+                            break;
+                        case 403:
+                            setError("Forbidden: You don’t have access to this quiz.");
+                            router.push("/403");
+                            break;
+                        case 404:
+                            setError("No quiz configuration is created for this course yet now.");
+                            break;
+                        case 500:
+                            setError("Server Error: Please try again later.");
+                            break;
+                        default:
+                            setError("An unexpected error occurred.");
+                    }
+                } else {
+                    setError("Network error. Please check your connection.");
+                }
             })
             .finally(() => setLoading(false));
     }, [courseId]);
+    
 
     // ✅ Start Quiz Handler
     const handleStartQuiz = async () => {
