@@ -157,18 +157,9 @@ export default function UnpaidStudents() {
 
     return (
         <div className="container-fluid mt-4">
-            <div className="card shadow-lg p-4">
-                <div className="d-flex justify-content-end mt-4">
-                    <button
-                        className="btn btn-danger"
-                        disabled={selectedStudentIds.size === 0}
-                        onClick={handleDeactivate}
-                    >
-                        Deactivate Selected
-                    </button>
-                </div>
+            <div className="card shadow-sm p-4">
                 <div className="d-flex justify-content-between align-items-center mb-3">
-                    <h2 className="text-primary fw-bold">Unpaid Students List ({totalUnpaid})</h2>
+                    <h2 className="text-primary fw-bold mb-0">📚 Unpaid Students List ({totalUnpaid})</h2>
                     <CSVLink
                         data={exportData}
                         headers={exportHeaders}
@@ -179,37 +170,55 @@ export default function UnpaidStudents() {
                     </CSVLink>
                 </div>
 
-                <div className="row mb-3">
+                <div className="row g-3 mb-3">
                     <div className="col-md-4">
                         <label className="form-label">Select Month</label>
-                        <select className="form-control" value={month} onChange={(e) => setMonth(e.target.value)}>
+                        <select className="form-select" value={month} onChange={(e) => setMonth(e.target.value)}>
                             <option value="">All Months</option>
-                            {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].map(m => (
+                            {[
+                                "January", "February", "March", "April", "May", "June",
+                                "July", "August", "September", "October", "November", "December"
+                            ].map(m => (
                                 <option key={m} value={m}>{m}</option>
                             ))}
                         </select>
                     </div>
                     <div className="col-md-4">
                         <label className="form-label">Select Course</label>
-                        <select className="form-control" value={courseId} onChange={(e) => setCourseId(e.target.value)}>
+                        <select className="form-select" value={courseId} onChange={(e) => setCourseId(e.target.value)}>
                             <option value="">All Courses</option>
                             {courses.map(course => (
-                                <option key={course.courseId} value={course.courseId}>{course.courseId} - {course.course_title}</option>
+                                <option key={course.courseId} value={course.courseId}>
+                                    {course.courseId} - {course.course_title}
+                                </option>
                             ))}
                         </select>
                     </div>
                     <div className="col-md-4">
                         <label className="form-label">Select Batch</label>
-                        <select className="form-control" value={batchNo} onChange={(e) => setBatchNo(e.target.value)}>
+                        <select className="form-select" value={batchNo} onChange={(e) => setBatchNo(e.target.value)}>
                             <option value="">All Batches</option>
                             {courses.map(course => (
-                                <option key={course.batch_no} value={course.batch_no}>Batch {course.batch_no}</option>
+                                <option key={course.batch_no} value={course.batch_no}>
+                                    Batch {course.batch_no}
+                                </option>
                             ))}
                         </select>
                     </div>
                 </div>
 
-                <button className="btn btn-primary mb-3" onClick={fetchUnpaidStudents}>Apply Filters</button>
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                    <button className="btn btn-primary" onClick={fetchUnpaidStudents}>
+                        Apply Filters
+                    </button>
+                    <button
+                        className="btn btn-danger"
+                        disabled={selectedStudentIds.size === 0}
+                        onClick={handleDeactivate}
+                    >
+                        Deactivate Selected
+                    </button>
+                </div>
 
                 {loading ? (
                     <p className="text-center">Loading...</p>
@@ -217,7 +226,7 @@ export default function UnpaidStudents() {
                     <p className="text-danger text-center">{error}</p>
                 ) : (
                     <div className="table-responsive">
-                        <table className="table table-bordered table-hover w-100">
+                        <table className="table table-bordered table-hover align-middle text-center">
                             <thead className="table-dark">
                                 <tr>
                                     <th>
@@ -229,9 +238,9 @@ export default function UnpaidStudents() {
                                     </th>
                                     <th>#</th>
                                     <th>Student ID</th>
-                                    <th>Student Name</th>
+                                    <th>Name</th>
                                     <th>Course ID</th>
-                                    <th>Batch No</th>
+                                    <th>Batch</th>
                                     <th>Mobile</th>
                                     <th>Email</th>
                                 </tr>
@@ -253,7 +262,6 @@ export default function UnpaidStudents() {
                                                     {student.studentId}
                                                 </Link>
                                             </td>
-
                                             <td>{student.student_name}</td>
                                             <td>{student.courseId}</td>
                                             <td>{student.batch_no}</td>
@@ -263,7 +271,9 @@ export default function UnpaidStudents() {
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan="8" className="text-center text-warning">No unpaid students found.</td>
+                                        <td colSpan="8" className="text-warning text-center">
+                                            No unpaid students found.
+                                        </td>
                                     </tr>
                                 )}
                             </tbody>

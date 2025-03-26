@@ -96,7 +96,7 @@ export default function CourseManagement() {
         <div className="container mt-5">
             {/* ✅ Page Header */}
             <div className="d-flex justify-content-between align-items-center mb-3">
-                <h2 className="fw-bold text-primary">Course Management</h2>
+                <h2 className="fw-bold text-primary">Course Management ({courses.length})</h2>
                 <Link href="/course/create">
                     <button className="btn btn-success">+ Create Course</button>
                 </Link>

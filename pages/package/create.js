@@ -22,7 +22,7 @@ export default function CreatePackage() {
     useEffect(() => {
         const fetchCourses = async () => {
             try {
-                const response = await axios.get(process.env.NEXT_PUBLIC_API_URL+"/courses/list");
+                const response = await axios.get(process.env.NEXT_PUBLIC_API_URL+"/courses/list?is_enabled=true");
                 setCourses(response.data.courses); // ✅ Set course list
             } catch (err) {
                 console.error("Error fetching courses:", err);

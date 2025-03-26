@@ -10,8 +10,8 @@ const Sidebar = ({ role, isOpen, toggleSidebar }) => {
         ? [
             { name: "Dashboard", path: "/dashboard", icon: FaChartBar },
             { name: "Student List", path: "/student-list", icon: FaUsers },
-            { name: "Payment List", path: "/payments", icon: FaMoneyCheckAlt },
-            { name: "Unpaid Student List", path: "/unpaidStudents", icon: FaUserSlash },
+            { name: "Payment History", path: "/payments/history", icon: FaMoneyCheckAlt },
+            { name: "Unpaid Students", path: "/payments/unpaid", icon: FaUserSlash },
 
             { name: "Create Course", path: "/course/list", icon: FaChalkboardTeacher },
             { name: "Create Package", path: "/package/list", icon: FaBoxOpen },

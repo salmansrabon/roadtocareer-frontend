@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { useRouter } from "next/router";  // ✅ Import router for navigation
+import { useRouter } from "next/router";
 import axios from "axios";
 
 export default function CoursesSection() {
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-    const router = useRouter(); // ✅ Router Instance
+    const router = useRouter();
 
     useEffect(() => {
         axios.get(process.env.NEXT_PUBLIC_API_URL + "/courses/list")
