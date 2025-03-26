@@ -14,7 +14,7 @@ const Sidebar = ({ role, isOpen, toggleSidebar }) => {
             { name: "Unpaid Student List", path: "/unpaidStudents", icon: FaUserSlash },
 
             { name: "Create Course", path: "/course/list", icon: FaChalkboardTeacher },
-            { name: "Create Package", path: "/create-package", icon: FaBoxOpen },
+            { name: "Create Package", path: "/package/list", icon: FaBoxOpen },
             { name: "Create Modules", path: "/modules", icon: FaCubes },
 
             { name: "Attendance", path: "/attendanceList", icon: FaClipboardList },

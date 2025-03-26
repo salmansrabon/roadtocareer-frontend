@@ -63,11 +63,11 @@ export default function CourseDetails() {
                     {/* ✅ Course Details */}
                     <div className="col-md-6">
                         <div className="card shadow-lg border-0 rounded-4 overflow-hidden hover-scale">
-                            <img 
-                                src={course.course_image} 
+                            <img
+                                src={course.course_image}
                                 className="card-img-top object-fit-cover"
-                                alt={course.course_title} 
-                                style={{ height: "300px", objectFit: "cover" }} 
+                                alt={course.course_title}
+                                style={{ height: "300px", objectFit: "cover" }}
                             />
                             <div className="card-body text-center">
                                 <h3 className="card-title text-dark fw-bold">{course.course_title}</h3>
@@ -75,7 +75,12 @@ export default function CourseDetails() {
                                     <strong>Batch:</strong> <span className="text-primary">{course.batch_no}</span> <br />
                                     <strong>Package:</strong> <span className="text-warning">{course.Packages[0]?.packageName || "N/A"}</span> <br />
                                     <strong>Course Fee:</strong> <span className="text-danger fw-bold">{course.Packages[0]?.jobholderFee || "N/A"} TK</span> <br />
-                                    <strong>After Discount:</strong> <span className="text-success fw-bold">{course.Packages[0]?.studentFee || "N/A"} TK</span> 
+                                    {course.Packages[0]?.studentFee > 0 && (
+                                        <p className="card-text text-muted">
+                                            <strong>After Discount:</strong> <span className="text-success fw-bold">{course.Packages[0].studentFee} TK</span>
+                                        </p>
+                                    )}
+
                                 </p>
                                 <Link href={`/enroll/${course.courseId}`} passHref>
                                     <button className="btn btn-lg btn-success w-100 fw-bold shadow-sm mt-2">
@@ -93,8 +98,8 @@ export default function CourseDetails() {
                             {modules.length > 0 ? (
                                 <ul className="list-group list-group-flush">
                                     {modules.map((mod, index) => (
-                                        <li 
-                                            key={index} 
+                                        <li
+                                            key={index}
                                             className="list-group-item border-0 text-muted p-2"
                                             style={{ fontSize: "16px", cursor: "pointer", transition: "0.3s" }}
                                             onClick={() => handleToggle(index)} // ✅ Expand/collapse on click

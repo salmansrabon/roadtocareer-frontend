@@ -9,7 +9,7 @@ export default function CoursesSection() {
     const router = useRouter(); // ✅ Router Instance
 
     useEffect(() => {
-        axios.get(process.env.NEXT_PUBLIC_API_URL+"/courses/list")
+        axios.get(process.env.NEXT_PUBLIC_API_URL + "/courses/list")
             .then((res) => {
                 const enabledCourses = res.data.courses.filter(course => course.is_enabled);
                 setCourses(enabledCourses);
@@ -44,9 +44,19 @@ export default function CoursesSection() {
                                         <p className="card-text text-muted">
                                             <strong>Batch:</strong> {course.batch_no} <br />
                                             <strong>Course Fee:</strong> <span className="text-success">{course.Packages[0]?.jobholderFee || "N/A"} TK</span> <br />
-                                            <strong>After discount, only</strong> <span className="text-primary">{course.Packages[0]?.studentFee || "N/A"} TK</span><strong> for the fresh graduates, students, and unemployed</strong>
+
+                                            {course.Packages[0]?.studentFee == "0.00" ? (
+                                                <span className="text-info"><strong>🎓 Only Merit discount available for the top scorers</strong></span>
+                                            ) : (
+                                                <>
+                                                    <strong>After discount, only</strong>
+                                                    <span className="text-primary"> {course.Packages[0]?.studentFee || "N/A"} TK</span>
+                                                    <strong> for the fresh graduates, students, and unemployed</strong>
+                                                </>
+                                            )}
                                         </p>
-                                        <button 
+
+                                        <button
                                             className="btn btn-outline-primary w-100 mt-2"
                                             onClick={() => router.push(`/courses/${course.courseId}`)} // ✅ Navigate to Course Details Page
                                         >
