@@ -34,7 +34,7 @@ export default function AttendancePage() {
     const fetchAttendance = async (studentId) => {
         setLoading(true);
         setError("");
-        
+    
         try {
             const token = localStorage.getItem("token");
     
@@ -45,26 +45,56 @@ export default function AttendancePage() {
                 return;
             }
     
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/students/attendance/${studentId}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            const response = await axios.get(
+                `${process.env.NEXT_PUBLIC_API_URL}/students/attendance/${studentId}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
     
-            setAttendanceList(response.data.attendanceList);
-            setTotalClicks(response.data.totalClicks);
-            setAttendancePercentage(response.data.attendancePercentage);
+            // ✅ Parse attendanceList safely
+            let rawList = response.data.attendanceList;
+            let parsedList = [];
     
-            // ✅ Set last attendance time if exists
-            if (response.data.attendanceList.length > 0) {
-                const lastEntry = response.data.attendanceList[response.data.attendanceList.length - 1];
+            try {
+                parsedList = typeof rawList === "string" ? JSON.parse(rawList) : rawList;
+    
+                // ✅ Handle double-stringified edge case
+                if (typeof parsedList === "string") {
+                    parsedList = JSON.parse(parsedList);
+                }
+    
+                if (!Array.isArray(parsedList)) {
+                    parsedList = [];
+                }
+    
+            } catch (parseErr) {
+                console.error("⚠️ Failed to parse attendanceList:", rawList);
+                setError("Invalid attendance data format.");
+                setLoading(false);
+                return;
+            }
+    
+            // ✅ Dynamically calculate totalClicks and attendancePercentage
+            const total = parsedList.length;
+            const percentage = ((total / 30) * 100).toFixed(2); // can append % in UI if needed
+    
+            setAttendanceList(parsedList);
+            setTotalClicks(total);
+            setAttendancePercentage(percentage);
+    
+            // ✅ Set last attendance time
+            if (parsedList.length > 0) {
+                const lastEntry = parsedList[parsedList.length - 1];
                 const lastTime = new Date(lastEntry.time);
                 setLastAttendanceTime(lastTime);
             }
     
         } catch (err) {
             console.error("Error fetching attendance:", err);
-            
+    
             if (err.response) {
                 switch (err.response.status) {
                     case 400:
@@ -96,6 +126,9 @@ export default function AttendancePage() {
         }
     };
     
+
+
+
 
     // ✅ Handle Attendance Marking
     const markAttendance = async () => {
