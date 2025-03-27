@@ -75,11 +75,13 @@ export default function CourseDetails() {
                                     <strong>Batch:</strong> <span className="text-primary">{course.batch_no}</span> <br />
                                     <strong>Package:</strong> <span className="text-warning">{course.Packages[0]?.packageName || "N/A"}</span> <br />
                                     <strong>Course Fee:</strong> <span className="text-danger fw-bold">{course.Packages[0]?.jobholderFee || "N/A"} TK</span> <br />
-                                    {course.Packages[0]?.studentFee > 0 && (
-                                        <p className="card-text text-muted">
-                                            <strong>After Discount:</strong> <span className="text-success fw-bold">{course.Packages[0].studentFee} TK</span>
-                                        </p>
-                                    )}
+                                    {course.Packages[0] &&
+                                        parseFloat(course.Packages[0].studentFee) < parseFloat(course.Packages[0].jobholderFee) && (
+                                            <p className="card-text text-muted">
+                                                <strong>After Discount:</strong> <span className="text-success fw-bold">{course.Packages[0].studentFee} TK</span>
+                                            </p>
+                                        )}
+
 
                                 </p>
                                 <Link href={`/enroll/${course.courseId}`} passHref>

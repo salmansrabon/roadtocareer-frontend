@@ -76,39 +76,52 @@ const PackageList = () => {
                     <tr>
                         <th>ID</th>
                         <th>Course ID</th>
+                        <th>Batch No</th>
                         <th>Package</th>
                         <th>Student Fee</th>
                         <th>Jobholder Fee</th>
                         <th>Installment</th>
+                        <th>Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {packages.map((pkg) => (
-                        <tr key={pkg.id}>
-                            <td>{pkg.id}</td>
-                            <td>{pkg.courseId}</td>
-                            <td>{pkg.packageName}</td>
-                            <td>{pkg.studentFee} TK</td>
-                            <td>{pkg.jobholderFee} TK</td>
-                            <td>{pkg.installment}</td>
-                            <td>
-                                <button
-                                    className="btn btn-sm btn-primary me-2"
-                                    onClick={() => handleEditClick(pkg)}
-                                >
-                                    Edit
-                                </button>
-                                <button
-                                    className="btn btn-sm btn-danger"
-                                    onClick={() => handleDelete(pkg.id)}
-                                >
-                                    Delete
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
+                    {[...packages]
+                        .sort((a, b) => Number(b.Course?.batch_no) - Number(a.Course?.batch_no))
+                        .map((pkg) => (
+                            <tr key={pkg.id}>
+                                <td>{pkg.id}</td>
+                                <td>{pkg.courseId}</td>
+                                <td>{pkg.Course?.batch_no}</td>
+                                <td>{pkg.packageName}</td>
+                                <td>{pkg.studentFee} TK</td>
+                                <td>{pkg.jobholderFee} TK</td>
+                                <td>{pkg.installment}</td>
+                                <td>
+                                    {pkg.Course?.is_enabled ? (
+                                        <span className="badge bg-success">Enabled</span>
+                                    ) : (
+                                        <span className="badge bg-secondary">Disabled</span>
+                                    )}
+                                </td>
+                                <td>
+                                    <button
+                                        className="btn btn-sm btn-primary me-2"
+                                        onClick={() => handleEditClick(pkg)}
+                                    >
+                                        Edit
+                                    </button>
+                                    <button
+                                        className="btn btn-sm btn-danger"
+                                        onClick={() => handleDelete(pkg.id)}
+                                    >
+                                        Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
                 </tbody>
+
             </table>
 
             {editingPkg && (

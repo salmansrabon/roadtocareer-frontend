@@ -121,25 +121,35 @@ export default function CourseManagement() {
                         </tr>
                     </thead>
                     <tbody>
-                        {courses.map((course) => (
-                            <tr key={course.courseId}>
-                                <td>{course.courseId}</td>
-                                <td>{course.batch_no}</td>
-                                <td>{course.course_title}</td>
-                                <td>
-                                    <span className={`badge ${course.is_enabled ? "bg-success" : "bg-danger"}`}>
-                                        {course.is_enabled ? "Enabled" : "Disabled"}
-                                    </span>
-                                </td>
-                                <td>{course.Packages.length > 0 ? course.Packages[0].packageName : "N/A"}</td>
-                                <td>{course.Packages.length > 0 ? `${course.Packages[0].studentFee} TK` : "N/A"}</td>
-                                <td>{course.Packages.length > 0 ? `${course.Packages[0].jobholderFee} TK` : "N/A"}</td>
-                                <td>
-                                    <button className="btn btn-warning btn-sm me-2" onClick={() => openEditModal(course)}>Edit</button>
-                                    <button className="btn btn-danger btn-sm" onClick={() => handleDelete(course.courseId)}>Delete</button>
-                                </td>
-                            </tr>
-                        ))}
+                        {[...courses]
+                            .sort((a, b) => Number(b.batch_no) - Number(a.batch_no)) // Descending sort
+                            .map((course) => (
+                                <tr key={course.courseId}>
+                                    <td className="fw-semibold">{course.courseId}</td>
+                                    <td className="text-center fw-bold">{course.batch_no}</td>
+                                    <td>{course.course_title}</td>
+                                    <td>
+                                        <span className={`badge rounded-pill ${course.is_enabled ? "bg-success" : "bg-secondary"}`}>
+                                            {course.is_enabled ? "Enabled" : "Disabled"}
+                                        </span>
+                                    </td>
+                                    <td>{course.Packages[0]?.packageName || "N/A"}</td>
+                                    <td className="text-primary fw-semibold">
+                                        {course.Packages[0]?.studentFee ? `${course.Packages[0].studentFee} TK` : "N/A"}
+                                    </td>
+                                    <td className="text-success fw-semibold">
+                                        {course.Packages[0]?.jobholderFee ? `${course.Packages[0].jobholderFee} TK` : "N/A"}
+                                    </td>
+                                    <td>
+                                        <button className="btn btn-sm btn-warning me-2" onClick={() => openEditModal(course)}>
+                                            Edit
+                                        </button>
+                                        <button className="btn btn-sm btn-danger" onClick={() => handleDelete(course.courseId)}>
+                                            Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
                     </tbody>
                 </table>
             )}
@@ -169,8 +179,8 @@ export default function CourseManagement() {
                                     <label className="form-label">Description</label>
                                     <textarea className="form-control" name="short_description" value={formData.short_description} onChange={handleChange} />
                                 </div>
-                                 {/* ✅ Drive Folder ID */}
-                                 <div className="col-md-6 mt-2">
+                                {/* ✅ Drive Folder ID */}
+                                <div className="col-md-6 mt-2">
                                     <label className="form-label">Drive Folder ID</label>
                                     <input type="text" className="form-control" name="drive_folder_id" value={formData.drive_folder_id} onChange={handleChange} />
                                 </div>
