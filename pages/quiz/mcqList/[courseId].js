@@ -9,12 +9,12 @@ export default function McqList() {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    
+
     useEffect(() => {
         if (!courseId) return;
-    
+
         // ✅ Fetch MCQs by Course ID
-        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/mcq/admin/fetch/${courseId}`,{
+        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/mcq/admin/fetch/${courseId}`, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
             }
@@ -25,7 +25,7 @@ export default function McqList() {
             })
             .catch(err => {
                 console.error("Error fetching MCQs:", err);
-                
+
                 if (err.response) {
                     // ✅ Handle specific error status codes
                     if (err.response.status === 404) {
@@ -43,11 +43,11 @@ export default function McqList() {
                 } else {
                     setError("Network error. Please check your internet connection.");
                 }
-    
+
                 setLoading(false);
             });
     }, [courseId]);
-    
+
 
     // ✅ Handle Input Change for Editing MCQs
     const handleInputChange = (index, field, value) => {
@@ -77,6 +77,26 @@ export default function McqList() {
             setSaving(false);
         }
     };
+    const handleDelete = async (mcq_id) => {
+        const confirmDelete = window.confirm("Are you sure you want to delete this MCQ?");
+        if (!confirmDelete) return;
+
+        try {
+            await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/mcq/delete/${mcq_id}`, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                }
+            });
+
+            // ✅ Filter out deleted MCQ from the UI
+            setMcqs(prevMcqs => prevMcqs.filter(mcq => mcq.mcq_id !== mcq_id));
+            alert("MCQ deleted successfully!");
+        } catch (err) {
+            console.error("Error deleting MCQ:", err);
+            alert("Failed to delete the MCQ.");
+        }
+    };
+
 
     return (
         <div className="container mt-5">
@@ -162,14 +182,24 @@ export default function McqList() {
                                             />
                                         </td>
                                         <td>
-                                            <button
-                                                className="btn btn-success"
-                                                onClick={() => handleSave(mcq)}
-                                                disabled={saving}
-                                            >
-                                                {saving ? "Saving..." : "Save"}
-                                            </button>
+                                            <div className="d-flex gap-2">
+                                                <button
+                                                    className="btn btn-success btn-sm"
+                                                    onClick={() => handleSave(mcq)}
+                                                    disabled={saving}
+                                                >
+                                                    {saving ? "Saving..." : "Save"}
+                                                </button>
+                                                <button
+                                                    className="btn btn-danger btn-sm"
+                                                    onClick={() => handleDelete(mcq.mcq_id)}
+                                                >
+                                                    Delete
+                                                </button>
+                                            </div>
                                         </td>
+
+
                                     </tr>
                                 ))}
                             </tbody>
