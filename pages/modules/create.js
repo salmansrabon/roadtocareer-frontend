@@ -14,7 +14,7 @@ export default function CreateModule() {
 
     // ✅ Fetch Courses and Packages
     useEffect(() => {
-        axios.get(process.env.NEXT_PUBLIC_API_URL+"/courses/list")
+        axios.get(process.env.NEXT_PUBLIC_API_URL + "/courses/list?is_enabled=true")
             .then(res => {
                 setCourses(res.data.courses);
             })
@@ -62,7 +62,7 @@ export default function CreateModule() {
         setLoading(true);
 
         try {
-            await axios.post(process.env.NEXT_PUBLIC_API_URL+"/modules/add", {
+            await axios.post(process.env.NEXT_PUBLIC_API_URL + "/modules/add", {
                 courseId: selectedCourseId,
                 packageId: selectedPackageId,
                 module: JSON.stringify(modules)
@@ -88,28 +88,33 @@ export default function CreateModule() {
                     {/* Course Dropdown */}
                     <div className="mb-3">
                         <label className="form-label">Select Course</label>
-                        <select 
-                            className="form-control" 
-                            value={selectedCourseId} 
-                            onChange={handleCourseChange} 
+                        <select
+                            className="form-control"
+                            value={selectedCourseId}
+                            onChange={handleCourseChange}
                             required
                         >
                             <option value="">-- Select Course --</option>
-                            {courses.map(course => (
-                                <option key={course.courseId} value={course.courseId}>
-                                    {course.course_title} (Batch {course.batch_no})
-                                </option>
-                            ))}
+                            {courses
+                                .slice()
+                                .sort((a, b) => parseInt(b.batch_no) - parseInt(a.batch_no)) // ✅ Descending sort
+                                .map(course => (
+                                    <option key={course.courseId} value={course.courseId}>
+                                        {course.courseId} (Batch {course.batch_no})
+                                    </option>
+                                ))
+                            }
+
                         </select>
                     </div>
 
                     {/* Package Dropdown */}
                     <div className="mb-3">
                         <label className="form-label">Select Package</label>
-                        <select 
-                            className="form-control" 
-                            value={selectedPackageId} 
-                            onChange={(e) => setSelectedPackageId(e.target.value)} 
+                        <select
+                            className="form-control"
+                            value={selectedPackageId}
+                            onChange={(e) => setSelectedPackageId(e.target.value)}
                             required
                             disabled={!packages.length} // Disable if no packages available
                         >

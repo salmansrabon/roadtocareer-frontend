@@ -147,15 +147,25 @@ export default function PaymentList() {
                     />
                 </div>
                 <div className="col-md-4">
-                    <select className="form-control" name="courseId" value={filters.courseId} onChange={handleFilterChange}>
+                    <select
+                        className="form-control"
+                        name="courseId"
+                        value={filters.courseId}
+                        onChange={handleFilterChange}
+                    >
                         <option value="">All Courses</option>
-                        {courses.map((course) => (
-                            <option key={course.courseId} value={course.courseId}>
-                                {course.courseId} - {course.course_title}
-                            </option>
-                        ))}
+                        {courses
+                            .slice() // make a copy to avoid mutating the original
+                            .sort((a, b) => parseInt(b.batch_no) - parseInt(a.batch_no)) // ✅ sort descending numerically
+                            .map((course) => (
+                                <option key={course.courseId} value={course.courseId}>
+                                    {course.courseId} - Batch-{course.batch_no}
+                                </option>
+                            ))
+                        }
                     </select>
                 </div>
+
                 <div className="col-md-4">
                     <select className="form-control" name="month" value={filters.month} onChange={handleFilterChange}>
                         <option value="">All Months</option>

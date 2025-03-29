@@ -28,7 +28,9 @@ export default function Dashboard() {
         try {
             const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/courses/list`);
             if (response.data.courses.length > 0) {
-                const sortedCourses = response.data.courses.sort((a, b) => b.courseId.localeCompare(a.courseId));
+                // ✅ Sort courses by batch_no descending
+                const sortedCourses = response.data.courses.sort((a, b) => parseInt(b.batch_no) - parseInt(a.batch_no));
+    
                 setCourses(sortedCourses);
                 setSelectedCourse(sortedCourses[0]?.courseId || "");
             }
@@ -36,6 +38,7 @@ export default function Dashboard() {
             console.error("Failed to fetch courses:", err);
         }
     };
+    
 
     const fetchDashboardData = async () => {
         setLoading(true);
@@ -105,19 +108,24 @@ export default function Dashboard() {
                         {["January", "February", "March", "April", "May", "June",
                             "July", "August", "September", "October", "November", "December"].map((month) => (
                                 <option key={month} value={month}>{month}</option>
-                        ))}
+                            ))}
                     </select>
                 </div>
 
                 <div className="col-md-6">
                     <label className="form-label fw-bold">Select Course</label>
                     <select className="form-control" value={selectedCourse} onChange={(e) => setSelectedCourse(e.target.value)}>
-                        {courses.map((course) => (
-                            <option key={course.courseId} value={course.courseId}>
-                                {course.courseId} - {course.course_title}
-                            </option>
-                        ))}
+                        {courses
+                            .slice()
+                            .sort((a, b) => parseInt(b.batch_no) - parseInt(a.batch_no)) // ✅ Sort descending numerically
+                            .map((course) => (
+                                <option key={course.courseId} value={course.courseId}>
+                                    {course.courseId} - Batch-{course.batch_no}
+                                </option>
+                            ))
+                        }
                     </select>
+
                 </div>
             </div>
 

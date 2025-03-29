@@ -108,30 +108,20 @@ export default function AttendanceList() {
                             value={filters.courseId}
                             onChange={handleFilterChange}
                         >
-                            <option value="">All Courses</option>
-                            {courses.map(course => (
-                                <option key={course.courseId} value={course.courseId}>
-                                    {course.courseId} - {course.course_title}
-                                </option>
-                            ))}
+                            <option value="">Select Course</option>
+                            {courses
+                                .slice()
+                                .sort((a, b) => parseInt(b.batch_no) - parseInt(a.batch_no)) // ✅ Sort descending
+                                .map(course => (
+                                    <option key={course.courseId} value={course.courseId}>
+                                        {course.courseId} - Batch-{course.batch_no}
+                                    </option>
+                                ))
+                            }
+
                         </select>
                     </div>
-                    <div className="col-md-4">
-                        <label>Batch No</label>
-                        <select
-                            className="form-control"
-                            name="batch_no"
-                            value={filters.batch_no}
-                            onChange={handleFilterChange}
-                        >
-                            <option value="">All Batches</option>
-                            {courses.map(course => (
-                                <option key={course.batch_no} value={course.batch_no}>
-                                    {course.batch_no}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                    
                     <div className="col-md-4">
                         <label>Student Name</label>
                         <input

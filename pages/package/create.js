@@ -22,7 +22,7 @@ export default function CreatePackage() {
     useEffect(() => {
         const fetchCourses = async () => {
             try {
-                const response = await axios.get(process.env.NEXT_PUBLIC_API_URL+"/courses/list?is_enabled=true");
+                const response = await axios.get(process.env.NEXT_PUBLIC_API_URL + "/courses/list?is_enabled=true");
                 setCourses(response.data.courses); // ✅ Set course list
             } catch (err) {
                 console.error("Error fetching courses:", err);
@@ -44,14 +44,14 @@ export default function CreatePackage() {
         setLoading(true);
         setError("");
         setSuccess("");
-    
+
         try {
-            const response = await axios.post(process.env.NEXT_PUBLIC_API_URL+"/packages/create", formData);
+            const response = await axios.post(process.env.NEXT_PUBLIC_API_URL + "/packages/create", formData);
             setSuccess("Package created successfully!");
             setTimeout(() => router.push("/course/list"), 2000); // ✅ Redirect after success
         } catch (err) {
             console.error("Error creating package:", err);
-            
+
             // ✅ Handle duplicate package error
             if (err.response && err.response.status === 400) {
                 setError("A package is already created for this course.");
@@ -62,7 +62,7 @@ export default function CreatePackage() {
             setLoading(false);
         }
     };
-    
+
 
     return (
         <div className="container mt-4">
@@ -78,13 +78,21 @@ export default function CreatePackage() {
                         {/* Course ID Dropdown */}
                         <div className="col-md-6">
                             <label className="form-label">Select Course</label>
-                            <select name="courseId" className="form-control" required onChange={handleChange}>
+                            <select
+                                name="courseId"
+                                className="form-select"  // ✅ Use Bootstrap 5 class for selects
+                                required
+                                onChange={handleChange}
+                            >
                                 <option value="">-- Select Course --</option>
-                                {courses.map((course) => (
-                                    <option key={course.courseId} value={course.courseId}>
-                                        {course.courseId} - {course.course_title}
-                                    </option>
-                                ))}
+                                {courses
+                                    .slice()
+                                    .sort((a, b) => parseInt(b.batch_no) - parseInt(a.batch_no)) // ✅ Descending order
+                                    .map((course) => (
+                                        <option key={course.courseId} value={course.courseId}>
+                                            {course.courseId} - Batch-{course.batch_no}
+                                        </option>
+                                    ))}
                             </select>
                         </div>
 

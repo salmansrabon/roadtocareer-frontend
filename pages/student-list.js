@@ -147,7 +147,7 @@ export default function StudentList() {
     return (
         <div className="container-fluid mt-4">
             <div className="card shadow-lg p-4">
-            <div className="d-flex justify-content-between align-items-center mb-3">
+                <div className="d-flex justify-content-between align-items-center mb-3">
                     <h2 className="text-primary fw-bold">Student List ({totalStudents})</h2>
                     <CSVLink
                         data={exportData}
@@ -160,30 +160,31 @@ export default function StudentList() {
                 </div>
 
                 {/* ✅ Filters Section */}
-                <div className="row mb-3">
+                <div className="row md-3 mt-2">
                     {/* Course Dropdown */}
-                    <div className="col-md-3">
+                    <div className="col-md-3 mt-2">
                         <select className="form-control" name="courseId" value={filters.courseId} onChange={handleFilterChange}>
-                            <option value="">All Courses</option>
-                            {courses.map((course) => (
-                                <option key={course.courseId} value={course.courseId}>
-                                    {course.courseId} - {course.course_title}
-                                </option>
-                            ))}
+                            <option value="">Select Course</option>
+                            {courses
+                                .slice()
+                                .sort((a, b) => parseInt(b.batch_no) - parseInt(a.batch_no)) // ✅ numerical sort
+                                .map((course) => (
+                                    <option key={course.courseId} value={course.courseId}>
+                                        {course.courseId} - Batch-{course.batch_no}
+                                    </option>
+                                ))
+                            }
                         </select>
+
                     </div>
 
-                    {/* Batch No */}
-                    <div className="col-md-3">
-                        <input type="text" className="form-control" placeholder="Batch No" name="batch_no" value={filters.batch_no} onChange={handleFilterChange} />
-                    </div>
 
-                    {/* Student ID */}
-                    <div className="col-md-3">
-                        <input type="text" className="form-control" placeholder="Student ID" name="studentId" value={filters.studentId} onChange={handleFilterChange} />
+                    {/* Student Name */}
+                    <div className="col-md-3 mt-2">
+                        <input type="text" className="form-control" placeholder="Student Name" name="student_name" value={filters.student_name} onChange={handleFilterChange} />
                     </div>
                     {/* Salutation */}
-                    <div className="col-md-3">
+                    <div className="col-md-3 mt-2">
                         <select
                             className="form-control"
                             name="salutation"
@@ -195,9 +196,9 @@ export default function StudentList() {
                             <option value="Mrs">Mrs</option>
                         </select>
                     </div>
-                    {/* Student Name */}
-                    <div className="col-md-3">
-                        <input type="text" className="form-control" placeholder="Student Name" name="student_name" value={filters.student_name} onChange={handleFilterChange} />
+                    {/* Student ID */}
+                    <div className="col-md-3 mt-2">
+                        <input type="text" className="form-control" placeholder="Student ID" name="studentId" value={filters.studentId} onChange={handleFilterChange} />
                     </div>
 
                     {/* Email */}
@@ -217,8 +218,19 @@ export default function StudentList() {
 
                     {/* Profession */}
                     <div className="col-md-3 mt-2">
-                        <input type="text" className="form-control" placeholder="Profession" name="profession" value={filters.profession} onChange={handleFilterChange} />
+                        <select
+                            className="form-control"
+                            name="profession"
+                            value={filters.profession}
+                            onChange={handleFilterChange}
+                        >
+                            <option value="">Select Profession</option>
+                            <option value="Fresh Graduate">Fresh Graduate</option>
+                            <option value="Job Holder">Job Holder</option>
+                            <option value="Student">Student</option>
+                        </select>
                     </div>
+
 
                     {/* Company */}
                     <div className="col-md-3 mt-2">
@@ -228,7 +240,7 @@ export default function StudentList() {
                     {/* isValid Dropdown */}
                     <div className="col-md-3 mt-2">
                         <select className="form-control" name="isValid" value={filters.isValid} onChange={handleFilterChange}>
-                            <option value="">All Status</option>
+                            <option value="">Select Validity Status</option>
                             <option value="1">Active</option>
                             <option value="0">Disabled</option>
                         </select>
@@ -237,7 +249,7 @@ export default function StudentList() {
                     {/* isEnrolled Dropdown */}
                     <div className="col-md-3 mt-2">
                         <select className="form-control" name="isEnrolled" value={filters.isEnrolled} onChange={handleFilterChange}>
-                            <option value="">All Enrollment</option>
+                            <option value="">Select Enrollment Status</option>
                             <option value="1">True</option>
                             <option value="0">False</option>
                         </select>

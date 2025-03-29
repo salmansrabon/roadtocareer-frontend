@@ -185,15 +185,23 @@ export default function UnpaidStudents() {
                     </div>
                     <div className="col-md-4">
                         <label className="form-label">Select Course</label>
-                        <select className="form-select" value={courseId} onChange={(e) => setCourseId(e.target.value)}>
+                        <select
+                            className="form-select"
+                            value={courseId}
+                            onChange={(e) => setCourseId(e.target.value)}
+                        >
                             <option value="">All Courses</option>
-                            {courses.map(course => (
-                                <option key={course.courseId} value={course.courseId}>
-                                    {course.courseId} - {course.course_title}
-                                </option>
-                            ))}
+                            {courses
+                                .slice()
+                                .sort((a, b) => parseInt(b.batch_no) - parseInt(a.batch_no)) // ✅ descending by batch_no
+                                .map((course) => (
+                                    <option key={course.courseId} value={course.courseId}>
+                                        {course.courseId} - Batch-{course.batch_no}
+                                    </option>
+                                ))}
                         </select>
                     </div>
+
                     <div className="col-md-4">
                         <label className="form-label">Select Batch</label>
                         <select className="form-select" value={batchNo} onChange={(e) => setBatchNo(e.target.value)}>
