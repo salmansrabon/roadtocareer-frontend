@@ -45,14 +45,14 @@ export default function CoursesSection() {
                                             <strong>Batch:</strong> {course.batch_no} <br />
                                             <strong>Course Fee:</strong> <span className="text-success">{course.Packages[0]?.jobholderFee || "N/A"} TK</span> <br />
 
-                                            {console.log(course.Packages[0]?.studentFee, course.Packages[0]?.jobholderFee)};
+                                            {console.log(course.Packages[0]?.studentFee, course.Packages[0]?.jobholderFee)}
                                             {course.Packages[0]?.studentFee === course.Packages[0]?.jobholderFee ? (
                                                 <span className="text-info"><strong>🎓 Only Merit discount available for the top scorers</strong></span>
                                             ) : (
                                                 <>
                                                     <strong>After discount, only</strong>
                                                     <span className="text-primary"> {course.Packages[0]?.studentFee || "N/A"} TK</span>
-                                                    <strong> for the fresh graduates, students, and unemployed</strong>
+                                                    <strong> is payble for the fresh graduates, students, and unemployed in {course.Packages[0]?.installment} installments</strong>
                                                 </>
                                             )}
                                         </p>

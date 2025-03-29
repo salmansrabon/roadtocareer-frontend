@@ -73,16 +73,18 @@ export default function CourseDetails() {
                                 <h3 className="card-title text-dark fw-bold">{course.course_title}</h3>
                                 <p className="card-text text-muted">
                                     <strong>Batch:</strong> <span className="text-primary">{course.batch_no}</span> <br />
-                                    <strong>Package:</strong> <span className="text-warning">{course.Packages[0]?.packageName || "N/A"}</span> <br />
+                                    <strong>Package:</strong> <span className="text-success">{course.Packages[0]?.packageName || "N/A"}</span> <br />
                                     <strong>Course Fee:</strong> <span className="text-danger fw-bold">{course.Packages[0]?.jobholderFee || "N/A"} TK</span> <br />
                                     {course.Packages[0] &&
                                         parseFloat(course.Packages[0].studentFee) < parseFloat(course.Packages[0].jobholderFee) && (
-                                            <p className="card-text text-muted">
+                                            <span className="card-text text-muted">
                                                 <strong>After Discount:</strong> <span className="text-success fw-bold">{course.Packages[0].studentFee} TK</span>
-                                            </p>
-                                        )}
-
-
+                                            </span>
+                                        )    
+                                        
+                                    } 
+                                    <br />  
+                                    <strong>Installment:</strong> <span className="text-primary fw-bold">{course.Packages[0]?.installment || "N/A"}</span> <br /> 
                                 </p>
                                 <Link href={`/enroll/${course.courseId}`} passHref>
                                     <button className="btn btn-lg btn-success w-100 fw-bold shadow-sm mt-2">

@@ -113,6 +113,18 @@ export default function Profile() {
                                 disabled
                             />
                         </div>
+                        {/* Student Id */}
+                        <div className="col-md-6">
+                            <label className="form-label">batch No</label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                name="batch_no"
+                                value={formData.batch_no}
+                                onChange={handleChange}
+                                disabled
+                            />
+                        </div>
                         {/* Student Name */}
                         <div className="col-md-6">
                             <label className="form-label">Student Name</label>
