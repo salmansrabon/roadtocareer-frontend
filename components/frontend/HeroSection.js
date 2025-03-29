@@ -20,12 +20,12 @@ export default function HeroSection() {
                     <header className="col-md-6 text-start">
                         <h1 className="fw-bold display-4 text-dark">হয়ে উঠুন ইন্ডাস্ট্রি এক্সপার্ট</h1>
                         <p className="lead text-muted">
-                            আমাদের চলার পথ খুব বেশিদিন না, মাত্র ৩ বছর। এই ৩ বছরে আপনাদের সাপোর্ট এবং ভালোবাসায় আমরা মুগ্ধ। 
+                            আপনি কি একজন সফটওয়্যার টেস্ট ইঞ্জিনিয়ার হতে চান? অথবা SQA সেক্টরে আপনার ড্রীম জব পেতে চান?। তাহলে আপনি সঠিক জায়গাতেই আছেন। 
                             আমাদের আপ্রাণ প্রচেষ্টা আপনাকে সেরা ইন্সট্রাক্টর দিয়ে সফটওয়্যার ইন্ডাস্ট্রির প্রফেশনাল বিষয় গুলো হাতে কলমে শিখানো 
                             যাতে করে আপনি যথেষ্ট স্কিল্ড হয়ে সেরা কোম্পানি গুলোতে নিজের অবস্থান সুনিশ্চিত করতে পারেন। 
-                            সফটওয়্যার ইন্ডাস্ট্রি তে ক্ষুদ্র অবদান রাখতে আমরা এখন পর্যন্ত নিয়ে এসেছি ৩ টি কোর্স: 
+                            <br/>সফটওয়্যার ইন্ডাস্ট্রি তে ক্ষুদ্র অবদান রাখতে আমরা এখন পর্যন্ত নিয়ে এসেছি ৩ টি কোর্স: 
                             <strong> Full Stack SDET, Advanced Test Automation </strong> এবং 
-                            <strong> DevOps with Cloud Computing</strong>.
+                            <strong> ISTQB CTFL v4.0 Certification</strong>.
                         </p>
                         <button className="btn btn-primary btn-lg mt-3" onClick={scrollToCourses}>
                             Explore Courses
