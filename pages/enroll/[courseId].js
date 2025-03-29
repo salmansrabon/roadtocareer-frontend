@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
 import universitiesData from "/public/data/universities.json";
@@ -10,9 +10,10 @@ export default function EnrollStudent() {
     const [filteredUniversities, setFilteredUniversities] = useState([]); // ✅ Filtered universities
     const [search, setSearch] = useState(""); // ✅ Search input
     const [showDropdown, setShowDropdown] = useState(false);
+    const universityRef = useRef(null);
 
     const [formData, setFormData] = useState({
-        salutation: "Mr",
+        salutation: "",
         student_name: "",
         email: "",
         mobile: "",
@@ -54,6 +55,19 @@ export default function EnrollStudent() {
 
         setUniversities(sortedUniversities);
         setFilteredUniversities(sortedUniversities.slice(0, 5)); // Show first 5 by default
+    }, []);
+
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (universityRef.current && !universityRef.current.contains(event.target)) {
+                setShowDropdown(false);
+            }
+        }
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
     }, []);
 
 
@@ -164,11 +178,18 @@ export default function EnrollStudent() {
                             <label className="form-label fw-bold">Salutation
                                 <span className="text-danger fw-bold">*</span>
                             </label>
-                            <select className="form-control border-primary p-3" name="salutation" required onChange={handleChange}>
-                                <option value="">Select...</option>
+                            <select
+                                className="form-control border-primary p-3"
+                                name="salutation"
+                                required
+                                onChange={handleChange}
+                                value={formData.salutation}
+                            >
+                                <option value="" disabled hidden>-- Select Salutation --</option>
                                 <option value="Mr">Mr</option>
                                 <option value="Mrs">Mrs</option>
                             </select>
+
                         </div>
 
                         {/* ✅ Full Name */}
@@ -176,7 +197,7 @@ export default function EnrollStudent() {
                             <label className="form-label fw-bold">Full Name
                                 <span className="text-danger fw-bold">*</span>
                             </label>
-                            <input type="text" className="form-control border-primary p-3" name="student_name" required onChange={handleChange} />
+                            <input type="text" className="form-control border-primary p-3" name="student_name" placeholder="Write your full name" required onChange={handleChange} />
                         </div>
 
                         {/* ✅ Email */}
@@ -189,7 +210,7 @@ export default function EnrollStudent() {
                                 className="form-control border-primary p-3"
                                 name="email"
                                 required
-                                placeholder="Enter your Gmail address"
+                                placeholder="Enter your Gmail address only"
                                 onChange={(e) => {
                                     const value = e.target.value.trim();
                                     const input = e.target;
@@ -212,7 +233,8 @@ export default function EnrollStudent() {
                             <label className="form-label fw-bold">Mobile
                                 <span className="text-danger fw-bold">*</span>
                             </label>
-                            <input type="text" className="form-control border-primary p-3" name="mobile" required onChange={handleChange} />
+                            <input type="text" className="form-control border-primary p-3"
+                                name="mobile" placeholder="e.g. 01686100200" required onChange={handleChange} />
                         </div>
 
                         {/* ✅ Location */}
@@ -224,7 +246,7 @@ export default function EnrollStudent() {
                         </div>
 
                         {/* ✅ University */}
-                        <div className="col-md-6 position-relative">
+                        <div className="col-md-6 position-relative" ref={universityRef}>
                             <label className="form-label fw-bold">University
                                 <span className="text-danger fw-bold">*</span>
                             </label>
@@ -233,12 +255,14 @@ export default function EnrollStudent() {
                                 className="form-control border-primary p-3"
                                 name="university"
                                 value={search}
+                                placeholder="Type your university name and select"
                                 required
                                 onChange={handleInputChange}
                                 onFocus={() => setShowDropdown(true)}
                                 autoComplete="off"
                             />
 
+                            {/* ✅ Dropdown List */}
                             {/* ✅ Dropdown List */}
                             {showDropdown && filteredUniversities.length > 0 && (
                                 <ul className="list-group position-absolute w-100" style={{ zIndex: 10 }}>
@@ -271,7 +295,7 @@ export default function EnrollStudent() {
                                 <span className="text-danger fw-bold">*</span>
                             </label>
                             <select className="form-control border-primary p-3" name="profession" onChange={handleChange}>
-                                <option value="">Select...</option>
+                                <option value="">-- Select Profession --</option>
                                 <option value="Fresh Graduate">Fresh Graduate</option>
                                 <option value="Student">Student</option>
                                 <option value="Job Holder">Job Holder</option>
@@ -302,7 +326,7 @@ export default function EnrollStudent() {
                                 <span className="text-danger fw-bold">*</span>
                             </label>
                             <select className="form-control border-primary p-3" name="package_name" required onChange={handleChange}>
-                                <option value="">Select...</option>
+                                <option value="">-- Select Package --</option>
                                 {packages.map(pkg => (
                                     <option key={pkg.packageName} value={pkg.packageName}>{pkg.packageName}</option>
                                 ))}
@@ -311,19 +335,20 @@ export default function EnrollStudent() {
 
                         {/* ✅ KnowMe & Opinion */}
                         <div className="col-md-6">
-                            <label className="form-label fw-bold">How do you know us?
+                            <label className="form-label fw-bold">How do you know about us?
                                 <span className="text-danger fw-bold">*</span>
                             </label>
                             <select className="form-control border-primary p-3" name="knowMe" required onChange={handleChange}>
-                                <option value="">Select...</option>
+                                <option value="">-- Select Media --</option>
                                 <option value="Facebook">Facebook</option>
                                 <option value="Friends or Known">Friends or Known</option>
+                                <option value="Google Search">Google Search</option>
                             </select>
                         </div>
 
                         <div className="col-md-12">
                             <label className="form-label fw-bold">Share something about you (Optional)</label>
-                            <input type="text" className="form-control border-primary p-3" name="opinion" onChange={handleChange} />
+                            <input type="text" className="form-control border-primary p-3" name="opinion" placeholder="If you want to share something important about you" onChange={handleChange} />
                         </div>
                     </div>
 
