@@ -48,8 +48,8 @@ export default function Home() {
                     "url": "https://roadtocareer.net",
                     "logo": "https://roadtocareer.net/logo.png",
                     "sameAs": [
-                        "https://facebook.com/yourpage",
-                        "https://linkedin.com/company/yourcompany"
+                        "https://www.facebook.com/roadtosdet/",
+                        "https://www.linkedin.com/company/road-to-sdet"
                     ]
                 })
             }} />

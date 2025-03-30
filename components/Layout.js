@@ -1,21 +1,24 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { jwtDecode } from "jwt-decode";
 import { useRouter } from "next/router";
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
 
+const SIDEBAR_WIDTH = 260;
+
 const Layout = ({ children }) => {
     const [role, setRole] = useState("");
     const router = useRouter();
     const [isMobile, setIsMobile] = useState(false);
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true); // ✅ Sidebar is open by default on desktop
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const sidebarRef = useRef(null);
 
     // ✅ Check Authentication
     useEffect(() => {
         const token = localStorage.getItem("token");
 
         if (!token) {
-            router.push("/login"); // Redirect if not logged in
+            router.push("/login");
             return;
         }
 
@@ -29,45 +32,64 @@ const Layout = ({ children }) => {
         }
     }, []);
 
-    // ✅ Detect Screen Size & Adjust Sidebar Visibility
+    // ✅ Detect screen size
     useEffect(() => {
         const checkScreenSize = () => {
             const isNowMobile = window.innerWidth < 768;
             setIsMobile(isNowMobile);
-            setIsSidebarOpen(!isNowMobile); // ✅ Open by default on desktop, closed on mobile
+            setIsSidebarOpen(!isNowMobile); // Close by default on mobile
         };
 
-        checkScreenSize(); // Initial check
+        checkScreenSize();
         window.addEventListener("resize", checkScreenSize);
         return () => window.removeEventListener("resize", checkScreenSize);
     }, []);
 
+    // ✅ Close Sidebar on Outside Click (Only on Mobile)
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (
+                isMobile &&
+                isSidebarOpen &&
+                sidebarRef.current &&
+                !sidebarRef.current.contains(event.target)
+            ) {
+                setIsSidebarOpen(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [isSidebarOpen, isMobile]);
+
     return (
         <div className="d-flex">
-            {/* ✅ Sidebar - Always Open on Desktop, Toggleable on Mobile */}
-            <Sidebar
-                role={role}
-                isOpen={isSidebarOpen}
-                toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-            />
+            {/* ✅ Sidebar */}
+            <div ref={sidebarRef}>
+                <Sidebar
+                    role={role}
+                    isOpen={isSidebarOpen}
+                    toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+                />
+            </div>
 
             {/* ✅ Main Content Wrapper */}
             <div
                 className="d-flex flex-column"
                 style={{
-                    marginLeft: isSidebarOpen ? (isMobile ? "0px" : "260px") : "0px",
-                    width: isSidebarOpen ? (isMobile ? "100%" : "calc(100% - 260px)") : "100%",
+                    marginLeft: isSidebarOpen ? (isMobile ? "0px" : `${SIDEBAR_WIDTH}px`) : "0px",
+                    width: isSidebarOpen ? (isMobile ? "100%" : `calc(100% - ${SIDEBAR_WIDTH}px)`) : "100%",
                     transition: "margin-left 0.3s ease-in-out",
                     padding: "20px",
                 }}
             >
-                {/* ✅ Navbar */}
                 <Navbar
                     isSidebarOpen={isSidebarOpen}
                     toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
                 />
 
-                {/* ✅ Content Area */}
                 <div
                     className="content-container"
                     style={{

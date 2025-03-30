@@ -23,6 +23,10 @@ const FrontPageLayout = ({ children }) => {
             setMenuOpen(false); //Close menu after clicking (mobile view)
         }
     };
+    const navigateTo = (path) => {
+        setMenuOpen(false);
+        router.push(path);
+    };
 
 
     return (
@@ -54,13 +58,14 @@ const FrontPageLayout = ({ children }) => {
                     <span className="nav-link text-white" onClick={() => scrollToSection("team")}>
                         Our Team
                     </span>
-                    <Link href="/reviews" className="nav-link text-white">
+                    <span className="nav-link text-white" onClick={() => navigateTo("/reviews")}>
                         Reviews
-                    </Link>
-                    <Link href="/login" className="nav-link text-white">
+                    </span>
+                    <span className="nav-link text-white" onClick={() => navigateTo("/login")}>
                         Login
-                    </Link>
+                    </span>
                 </div>
+
             </nav>
 
             {/* Main Content */}

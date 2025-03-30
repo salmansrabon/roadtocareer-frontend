@@ -64,10 +64,17 @@ const Sidebar = ({ role, isOpen, toggleSidebar }) => {
                         <li key={idx} className="nav-item">
                             <Link href={item.path} passHref>
                                 <span
+                                    onClick={() => {
+                                        if (window.innerWidth < 768) {
+                                          toggleSidebar(); // Only hide sidebar on mobile view
+                                        }
+                                      }}
+                                      
                                     className={`nav-link d-flex align-items-center text-white px-3 py-2 ${router.pathname === item.path ? "bg-warning text-dark fw-bold" : ""}`}
+                                    role="button"
                                 >
                                     {item.icon && (
-                                        <span className="me-2">{item.icon && <item.icon />}</span>
+                                        <span className="me-2"><item.icon /></span>
                                     )}
                                     {item.name}
                                 </span>
@@ -75,6 +82,7 @@ const Sidebar = ({ role, isOpen, toggleSidebar }) => {
                         </li>
                     ))}
                 </ul>
+
             </div>
         </>
     );
