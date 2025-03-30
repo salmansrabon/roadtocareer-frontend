@@ -105,6 +105,25 @@ export default function PaymentList() {
             setCurrentPage(page);
         }
     };
+    const handleDeletePayment = async (id) => {
+        if (!confirm("Are you sure you want to delete this payment?")) return;
+    
+        try {
+            const token = localStorage.getItem("token");
+    
+            await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/payments/delete/${id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+    
+            // Refresh data after deletion
+            fetchPayments();
+            fetchExportData();
+        } catch (err) {
+            alert("❌ Failed to delete payment.");
+            console.error(err);
+        }
+    };
+    
 
     const exportHeaders = [
         { label: "Student ID", key: "studentId" },
@@ -193,6 +212,7 @@ export default function PaymentList() {
                         <th>Remaining Due</th>
                         <th>Month</th>
                         <th>Payment Date</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -212,6 +232,16 @@ export default function PaymentList() {
                                 <td>{payment.remainingBalance} TK</td>
                                 <td>{payment.month}</td>
                                 <td>{new Date(payment.paymentDateTime).toLocaleString()}</td>
+                                <td>
+                                    <button
+                                        className="btn btn-sm btn-danger"
+                                        onClick={() => handleDeletePayment(payment.id)}
+                                    >
+                                        Delete
+                                    </button>
+                                </td>
+
+
                             </tr>
                         ))
                     ) : (
