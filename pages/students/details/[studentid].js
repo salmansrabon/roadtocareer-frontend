@@ -16,6 +16,14 @@ export default function StudentDetails() {
     const [updateMessage, setUpdateMessage] = useState("");
     const [imageFile, setImageFile] = useState(null);
 
+    const [showModal, setShowModal] = useState(false);
+    const [migrationBatch, setMigrationBatch] = useState("");
+    const [migrationCourse, setMigrationCourse] = useState("");
+    const [migrationRemark, setMigrationRemark] = useState("");
+
+    const [courseList, setCourseList] = useState([]); // ✅ Store course list for modal dropdown
+
+
     useEffect(() => {
         if (!router.isReady || !studentid) return;
 
@@ -30,6 +38,13 @@ export default function StudentDetails() {
                 setError("Failed to fetch student details.");
                 setLoading(false);
             });
+        // 🟩 Fetch enabled courses for modal dropdown
+        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/courses/list?is_enabled=true`)
+            .then(res => {
+                const sortedCourses = res.data.courses.sort((a, b) => parseInt(b.batch_no) - parseInt(a.batch_no));
+                setCourseList(sortedCourses);
+            })
+            .catch(err => console.error("Failed to fetch course list", err));
     }, [router.isReady, studentid]);
 
     const handleChange = (e) => {
@@ -126,10 +141,6 @@ export default function StudentDetails() {
         setUpdating(false);
     };
 
-
-
-
-
     const handleCancel = () => {
         setFormData(originalData);
         setIsEditing(false);
@@ -145,6 +156,33 @@ export default function StudentDetails() {
             router.push("/student-list");
         } catch (err) {
             setError("Failed to delete student.");
+        }
+    };
+    const handleMigration = async () => {
+        const token = localStorage.getItem("token");
+        const payload = {
+            batch_no: migrationBatch,
+            CourseId: migrationCourse,
+            remark: migrationRemark || `Migrated batch ${student.batch_no} to batch ${migrationBatch}`,
+        };
+
+        try {
+            const response = await axios.post(
+                `${process.env.NEXT_PUBLIC_API_URL}/students/migrate/${studentid}`,
+                payload,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            setUpdateMessage("✅ Student migrated successfully.");
+            setShowModal(false);
+
+            setTimeout(() => {
+                fetchStudentData();
+            }, 2000);
+
+        } catch (error) {
+            console.error("❌ Migration failed:", error);
+            setUpdateMessage("❌ Failed to migrate student.");
         }
     };
 
@@ -391,16 +429,96 @@ export default function StudentDetails() {
                         </button>
                     </>
                 )}
+                <button className="btn btn-primary me-2" onClick={() => setShowModal(true)}>
+                    Migrate Student
+                </button>
 
                 <button className="btn btn-secondary px-4 fw-bold" onClick={() => router.push("/student-list")}>
                     ← Back to Student List
                 </button>
+
+
             </div>
 
             {/* ✅ Display Response Message */}
             {updateMessage && (
                 <div className="d-flex justify-content-center mt-3">
                     <div className="alert alert-info text-center w-50">{updateMessage}</div>
+                </div>
+            )}
+            {showModal && (
+                <div className="custom-modal">
+                    <div className="custom-modal-content p-4">
+                        <h5 className="mb-3">🚀 Migrate Student ({student.StudentId})</h5>
+                        <div className="mb-2">
+                            <label>New Course</label>
+                            <select
+                                className="form-select"
+                                value={migrationCourse}
+                                onChange={(e) => {
+                                    const selectedId = e.target.value;
+                                    const selectedCourse = courseList.find(c => c.courseId === selectedId);
+                                    setMigrationCourse(selectedId);
+                                    setMigrationBatch(selectedCourse?.batch_no || "");
+                                }}
+                            >
+                                <option value="">-- Select Course --</option>
+                                {courseList.map(course => (
+                                    <option key={course.courseId} value={course.courseId}>
+                                        {course.course_title} (Batch {course.batch_no})
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="mb-2">
+                            <label>New Batch No</label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                value={migrationBatch}
+                                onChange={(e) => setMigrationBatch(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="mb-2">
+                            <label>Remark (optional)</label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                value={migrationRemark}
+                                onChange={(e) => setMigrationRemark(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="d-flex justify-content-end">
+                            <button className="btn btn-secondary me-2" onClick={() => setShowModal(false)}>❌ Cancel</button>
+                            <button className="btn btn-success" onClick={handleMigration}>✅ Migrate</button>
+                        </div>
+                    </div>
+
+                    <style jsx>{`
+                        .custom-modal {
+                            position: fixed;
+                            top: 0;
+                            left: 0;
+                            width: 100%;
+                            height: 100%;
+                            background: rgba(0, 0, 0, 0.4);
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            z-index: 1050;
+                        }
+
+                        .custom-modal-content {
+                            background: #fff;
+                            border-radius: 10px;
+                            width: 90%;
+                            max-width: 500px;
+                            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+                        }
+                `}
+                    </style>
                 </div>
             )}
         </div>

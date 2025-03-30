@@ -291,7 +291,10 @@ export default function StudentList() {
                                                 <td>{student.Course?.courseId || "N/A"}</td>
                                                 <td>{student.batch_no}</td>
                                                 <td>{student.StudentId}</td>
-                                                <td>{student.student_name}</td>
+                                                <td style={{ cursor: "pointer", color: "#0d6efd" }} onClick={() => router.push(`/students/details/${student.StudentId}`)}>
+                                                    {student.student_name}
+                                                </td>
+
                                                 <td>{student.email}</td>
                                                 <td>{student.mobile}</td>
                                                 <td>{student.profession || "N/A"}</td>
