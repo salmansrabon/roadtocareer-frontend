@@ -6,24 +6,44 @@ export default function TeamSection() {
     const [teamMembers, setTeamMembers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [currentIndex, setCurrentIndex] = useState(0);
 
     useEffect(() => {
         fetchTeamMembers();
     }, []);
 
-    // ✅ Fetch Team Members
     const fetchTeamMembers = async () => {
-        setLoading(true);
-        setError("");
+    setLoading(true);
+    setError("");
 
-        try {
-            const response = await axios.get(process.env.NEXT_PUBLIC_API_URL+"/teams/list");
-            setTeamMembers(response.data.members);
-        } catch (err) {
-            setError("Failed to load team members.");
-        }
+    try {
+        const response = await axios.get(process.env.NEXT_PUBLIC_API_URL + "/teams/list");
+        const members = response.data.members;
 
-        setLoading(false);
+        setTeamMembers(members);
+        setCurrentIndex(members.length-1);
+    } catch (err) {
+        setError("Failed to load team members.");
+    }
+
+    setLoading(false);
+};
+
+
+    const handleNext = () => {
+        setCurrentIndex((prev) => (prev + 1) % teamMembers.length);
+    };
+
+    const handlePrev = () => {
+        setCurrentIndex((prev) => (prev - 1 + teamMembers.length) % teamMembers.length);
+    };
+
+    const getSlideStyle = (index) => {
+        const position = index - currentIndex;
+        if (position === 0 || position === -teamMembers.length || position === teamMembers.length) return "carousel-center";
+        if (position === -1 || position === teamMembers.length - 1) return "carousel-left";
+        if (position === 1 || position === -(teamMembers.length - 1)) return "carousel-right";
+        return "carousel-hidden";
     };
 
     return (
@@ -35,59 +55,113 @@ export default function TeamSection() {
                 {loading && <p>Loading team members...</p>}
                 {error && <p className="text-danger">{error}</p>}
 
-                <div className="row mt-4">
+                <div className="carousel-wrapper">
                     {teamMembers.length > 0 ? (
-                        teamMembers.map((member) => (
-                            <div key={member.id} className="col-md-4 mb-4">
-                                <div className="card shadow-sm team-card">
-                                    <Image
-                                        src={member.photo ? member.photo : "/hero-background-2.jpg"} // ✅ Fallback Image
-                                        alt={member.name}
-                                        width={200}
-                                        height={200}
-                                        className="rounded-circle mx-auto mt-3"
-                                        unoptimized={member.photo?.startsWith("http") ? false : true} // ✅ Avoid optimization issues for remote images
-                                    />
-                                    <div className="card-body">
-                                        <h5 className="fw-bold">{member.name}</h5>
-                                        <p className="text-muted mb-1">{member.designation} at {member.company || "N/A"}</p>
-                                        <p className="text-muted small">{member.about}</p>
-                                        <div className="social-links">
-                                            {member.linkedin && (
-                                                <a href={member.linkedin} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-primary me-2">
-                                                    LinkedIn
-                                                </a>
-                                            )}
-                                            {member.whatsapp && (
-                                                <a href={`https://wa.me/${member.whatsapp}`} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-success">
-                                                    WhatsApp
-                                                </a>
-                                            )}
+                        <div className="carousel">
+                            {teamMembers.map((member, index) => (
+                                <div key={member.id} className={`carousel-card ${getSlideStyle(index)}`}>
+                                    <div className="card shadow-sm team-card">
+                                        <Image
+                                            src={member.photo || "/hero-background-2.jpg"}
+                                            alt={member.name}
+                                            width={200}
+                                            height={200}
+                                            className="rounded-circle mx-auto mt-3"
+                                            unoptimized
+                                        />
+                                        <div className="card-body">
+                                            <h5 className="fw-bold">{member.name}</h5>
+                                            <p className="text-muted mb-1">{member.designation} at {member.company || "N/A"}</p>
+                                            <p className="text-muted small">{member.about}</p>
+                                            <div className="social-links">
+                                                {member.linkedin && (
+                                                    <a href={member.linkedin} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-primary me-2">
+                                                        LinkedIn
+                                                    </a>
+                                                )}
+                                                {member.whatsapp && (
+                                                    <a href={`https://wa.me/${member.whatsapp}`} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-success">
+                                                        WhatsApp
+                                                    </a>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))
+                            ))}
+                        </div>
                     ) : (
                         <p className="text-muted">No team members available.</p>
+                    )}
+
+                    {teamMembers.length > 1 && (
+                        <>
+                            <button className="btn btn-outline-primary carousel-prev" onClick={handlePrev}>⬅️ Previous</button>
+                            <button className="btn btn-outline-primary carousel-next" onClick={handleNext}>Next ➡️</button>
+                        </>
                     )}
                 </div>
             </div>
 
-            {/* ✅ Styles */}
             <style jsx>{`
+                .carousel-wrapper {
+                    position: relative;
+                    overflow: hidden;
+                    max-width: 100%;
+                    min-height: 500px;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                }
+                .carousel {
+                    position: relative;
+                    width: 100%;
+                    height: 100%;
+                }
+                .carousel-card {
+                    position: absolute;
+                    width: 320px;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%) scale(0.7);
+                    opacity: 0;
+                    transition: all 0.4s ease-in-out;
+                }
+                .carousel-center {
+                    transform: translate(-50%, -50%) scale(1.05);
+                    opacity: 1;
+                    z-index: 2;
+                }
+                .carousel-left {
+                    transform: translate(-160%, -50%) scale(0.9);
+                    opacity: 0.5;
+                    z-index: 1;
+                }
+                .carousel-right {
+                    transform: translate(60%, -50%) scale(0.9);
+                    opacity: 0.5;
+                    z-index: 1;
+                }
+                .carousel-hidden {
+                    display: none;
+                }
+                .carousel-prev {
+                    position: absolute;
+                    left: 10px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                }
+                .carousel-next {
+                    position: absolute;
+                    right: 10px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                }
                 .team-card {
                     border-radius: 12px;
-                    transition: transform 0.2s ease-in-out;
                     text-align: center;
                     padding-bottom: 20px;
-                }
-                .team-card:hover {
-                    transform: scale(1.05);
-                }
-                .social-links a {
-                    text-decoration: none;
-                    font-size: 14px;
+                    background: #fff;
                 }
             `}</style>
         </section>

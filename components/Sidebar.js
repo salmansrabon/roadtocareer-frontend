@@ -13,9 +13,9 @@ const Sidebar = ({ role, isOpen, toggleSidebar }) => {
             { name: "Payment History", path: "/payments/history", icon: FaMoneyCheckAlt },
             { name: "Unpaid Students", path: "/payments/unpaid", icon: FaUserSlash },
 
-            { name: "Create Course", path: "/course/list", icon: FaChalkboardTeacher },
-            { name: "Create Package", path: "/package/list", icon: FaBoxOpen },
-            { name: "Create Modules", path: "/modules", icon: FaCubes },
+            { name: "Course Config", path: "/course/list", icon: FaChalkboardTeacher },
+            { name: "Package Config", path: "/package/list", icon: FaBoxOpen },
+            { name: "Modules Config", path: "/modules", icon: FaCubes },
 
             { name: "Attendance", path: "/attendanceList", icon: FaClipboardList },
             { name: "Quiz Config", path: "/quiz/QuizConfigList", icon: FaQuestionCircle },
