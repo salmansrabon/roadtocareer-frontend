@@ -14,6 +14,7 @@ export default function StudentList() {
     const [courses, setCourses] = useState([]); // ✅ Store courses list
     const [currentPage, setCurrentPage] = useState(1);
     const studentsPerPage = 10;
+    const router = useRouter();
     const [filters, setFilters] = useState({
         courseId: "",
         batch_no: "",
@@ -28,7 +29,42 @@ export default function StudentList() {
         isEnrolled: "",
     });
 
-    const router = useRouter();
+    useEffect(() => {
+        if (router.isReady) {
+            const {
+                courseId = "",
+                batch_no = "",
+                studentId = "",
+                student_name = "",
+                email = "",
+                mobile = "",
+                university = "",
+                profession = "",
+                company = "",
+                isValid = "",
+                isEnrolled = "",
+                page = "1",
+                salutation = "",
+            } = router.query;
+
+            setFilters({
+                courseId,
+                batch_no,
+                studentId,
+                student_name,
+                email,
+                mobile,
+                university,
+                profession,
+                company,
+                isValid,
+                isEnrolled,
+                salutation,
+            });
+            setCurrentPage(parseInt(page, 10));
+        }
+    }, [router.isReady, router.query]);
+
 
     useEffect(() => {
         fetchStudents();
@@ -141,8 +177,19 @@ export default function StudentList() {
     // ✅ Handle Filter Changes
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
-        setFilters((prev) => ({ ...prev, [name]: value }));
+        const newFilters = { ...filters, [name]: value };
+        setFilters(newFilters);
+
+        router.push(
+            {
+                pathname: router.pathname,
+                query: { ...newFilters, page: 1 },
+            },
+            undefined,
+            { shallow: true }
+        );
     };
+
 
     return (
         <div className="container-fluid mt-4">
@@ -335,8 +382,19 @@ export default function StudentList() {
                 <Pagination
                     currentPage={currentPage}
                     totalPages={Math.ceil(totalStudents / studentsPerPage)}
-                    onPageChange={setCurrentPage}
+                    onPageChange={(page) => {
+                        setCurrentPage(page);
+                        router.push(
+                            {
+                                pathname: router.pathname,
+                                query: { ...filters, page },
+                            },
+                            undefined,
+                            { shallow: true }
+                        );
+                    }}
                 />
+
             </div>
         </div>
     );

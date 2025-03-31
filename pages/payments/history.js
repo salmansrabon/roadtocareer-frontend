@@ -17,11 +17,14 @@ export default function PaymentList() {
     const limit = 10;
     const router = useRouter();
 
+    const defaultMonth = new Date().toLocaleString("default", { month: "long" });
     const [filters, setFilters] = useState({
         studentId: "",
+        name: "",
         courseId: "",
-        month: "",
+        month: defaultMonth,
     });
+    
 
     useEffect(() => {
         fetchPayments();
@@ -89,11 +92,16 @@ export default function PaymentList() {
     const fetchCourses = async () => {
         try {
             const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/courses/list`);
-            setCourses(response.data.courses.sort((a, b) => b.courseId.localeCompare(a.courseId)));
+            const sortedCourses = response.data.courses.sort((a, b) => b.courseId.localeCompare(a.courseId));
+            setCourses(sortedCourses);
+            // If no courseId is selected, default to the latest course's courseId.
+            if (!filters.courseId && sortedCourses.length > 0) {
+                setFilters((prev) => ({ ...prev, courseId: sortedCourses[0].courseId }));
+            }
         } catch (err) {
             console.error("Failed to fetch courses.");
         }
-    };
+    };    
 
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
@@ -107,14 +115,14 @@ export default function PaymentList() {
     };
     const handleDeletePayment = async (id) => {
         if (!confirm("Are you sure you want to delete this payment?")) return;
-    
+
         try {
             const token = localStorage.getItem("token");
-    
+
             await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/payments/delete/${id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-    
+
             // Refresh data after deletion
             fetchPayments();
             fetchExportData();
@@ -123,7 +131,7 @@ export default function PaymentList() {
             console.error(err);
         }
     };
-    
+
 
     const exportHeaders = [
         { label: "Student ID", key: "studentId" },
@@ -155,17 +163,15 @@ export default function PaymentList() {
             </h5>
 
             <div className="row mb-3">
-                <div className="col-md-4">
-                    <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Student ID"
-                        name="studentId"
-                        value={filters.studentId}
-                        onChange={handleFilterChange}
-                    />
+                <div className="col-md-3">
+                    <select className="form-control" name="month" value={filters.month} onChange={handleFilterChange}>
+                        <option value="">All Months</option>
+                        {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].map((month) => (
+                            <option key={month} value={month}>{month}</option>
+                        ))}
+                    </select>
                 </div>
-                <div className="col-md-4">
+                <div className="col-md-3">
                     <select
                         className="form-control"
                         name="courseId"
@@ -184,15 +190,27 @@ export default function PaymentList() {
                         }
                     </select>
                 </div>
-
-                <div className="col-md-4">
-                    <select className="form-control" name="month" value={filters.month} onChange={handleFilterChange}>
-                        <option value="">All Months</option>
-                        {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].map((month) => (
-                            <option key={month} value={month}>{month}</option>
-                        ))}
-                    </select>
+                <div className="col-md-3">
+                    <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Student ID"
+                        name="studentId"
+                        value={filters.studentId}
+                        onChange={handleFilterChange}
+                    />
                 </div>
+                <div className="col-md-3">
+                    <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Student Name"
+                        name="name"
+                        value={filters.name}
+                        onChange={handleFilterChange}
+                    />
+                </div>
+
             </div>
 
             <button className="btn btn-primary mb-3 w-100" onClick={fetchPayments}>Apply Filters</button>

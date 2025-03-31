@@ -230,11 +230,32 @@ export default function EnrollStudent() {
 
                         {/* ✅ Mobile */}
                         <div className="col-md-6">
-                            <label className="form-label fw-bold">Mobile
-                                <span className="text-danger fw-bold">*</span>
+                            <label className="form-label fw-bold">
+                                Mobile <span className="text-danger fw-bold">*</span>
                             </label>
-                            <input type="text" className="form-control border-primary p-3"
-                                name="mobile" placeholder="e.g. 01686100200" required onChange={handleChange} />
+                            <input
+                                type="text"
+                                className="form-control border-primary p-3"
+                                name="mobile"
+                                placeholder="e.g. 01686100200"
+                                required
+                                pattern="\d*"
+                                inputMode="numeric"
+                                onKeyPress={(e) => {
+                                    // Allow only digits
+                                    if (!/[0-9]/.test(e.key)) {
+                                        e.preventDefault();
+                                    }
+                                }}
+                                onPaste={(e) => {
+                                    // Prevent pasting non-digit characters
+                                    const pastedData = e.clipboardData.getData("Text");
+                                    if (!/^\d+$/.test(pastedData)) {
+                                        e.preventDefault();
+                                    }
+                                }}
+                                onChange={handleChange}
+                            />
                         </div>
 
                         {/* ✅ Location */}
@@ -262,7 +283,6 @@ export default function EnrollStudent() {
                                 autoComplete="off"
                             />
 
-                            {/* ✅ Dropdown List */}
                             {/* ✅ Dropdown List */}
                             {showDropdown && filteredUniversities.length > 0 && (
                                 <ul className="list-group position-absolute w-100" style={{ zIndex: 10 }}>
