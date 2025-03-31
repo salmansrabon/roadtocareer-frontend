@@ -23,8 +23,11 @@ export default function UnpaidStudents() {
     const limit = 10;
 
     useEffect(() => {
+        const currentMonth = new Date().toLocaleString("default", { month: "long" });
+        setMonth(currentMonth); // ✅ Set current month
         fetchCourses();
     }, []);
+    
 
     useEffect(() => {
         fetchUnpaidStudents();
@@ -34,11 +37,16 @@ export default function UnpaidStudents() {
     const fetchCourses = async () => {
         try {
             const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/courses/list`);
-            setCourses(response.data.courses);
+            const sorted = response.data.courses.sort((a, b) => parseInt(b.batch_no) - parseInt(a.batch_no)); // Desc by batch_no
+            setCourses(sorted);
+            if (sorted.length > 0) {
+                setCourseId(sorted[0].courseId); // ✅ Set default course ID as latest
+            }
         } catch (error) {
             console.error("Error fetching courses:", error);
         }
     };
+    
 
     const fetchUnpaidStudents = async () => {
         setLoading(true);
